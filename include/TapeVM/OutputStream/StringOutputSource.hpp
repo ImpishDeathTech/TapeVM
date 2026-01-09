@@ -1,16 +1,16 @@
-/* StringOutputSource.hpp
- * Copyright (c) 2020-2025, Christopher Stephen Rafuse
+/* TapeVM/OutputStream/StringOutputSource.hpp
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
 #pragma once 
 
-#include <NoctSys/Configuration.hxx>
-#include <NoctSys/Scripting/TapeVM/OutputStream/OutputSource.hpp>
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/OutputStream/OutputSource.hpp>
 #include <cstdio>
 #include <string>
 
 namespace noct {
-  class NoctSysAPI StringOutputSource
+  class TapeAPI StringOutputSource
     : public OutputSource<char>
   {
     std::string m_buffer;
@@ -30,4 +30,5 @@ namespace noct {
     const char*      cstr() const;
 
   };
+
 }
