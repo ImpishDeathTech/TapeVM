@@ -1,5 +1,5 @@
 /* TapeVM.hpp
- * Copyright (c) 2020-2025, Christopher Stephen Rafuse
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
 #pragma once 
@@ -207,4 +207,5 @@ namespace noct {
     void loadVariableDefiners();
     void loadStdIO();
   };
+
 }
