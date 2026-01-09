@@ -1,5 +1,5 @@
 /* TapeVM/Base/Variables.cpp
- * Copyright (c) 20265, Christopher Stephen Rafuse
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
 #include <TapeVM.hpp>
@@ -145,3 +145,4 @@ namespace noct {
   }
 
 }
+
