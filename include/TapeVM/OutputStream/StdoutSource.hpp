@@ -9,7 +9,7 @@
 #include <cstdio>
 
 namespace noct {
-  class NoctSysAPI StdoutSource 
+  class TapeAPI StdoutSource 
     : public OutputSource<char>
   {
   public:
@@ -19,3 +19,4 @@ namespace noct {
   };
 
 }
+
