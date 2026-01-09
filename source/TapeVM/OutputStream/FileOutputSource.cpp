@@ -2,9 +2,23 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
+#include <TapeVM/Standalone.hxx>
+
+#if defined(TAPE_STANDALONE)
+
 #include <TapeVM/OutputStream/FileOutputSource.hpp>
 
+namespace tape {
+#else 
+
+#include <NoctSys/Scripting/TapeVM/OutputStream/FileOutputSource.hpp>
+
 namespace noct {
+#endif 
+
+  FileOutputSource::FileOutputSource(std::FILE* fd)
+    : m_fd(fd)
+  {}
 
   FileOutputSource::~FileOutputSource() {
     if (m_fd) 

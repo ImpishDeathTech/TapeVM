@@ -4,15 +4,28 @@
  */
 #pragma once 
 
-#include <TapeVM/Configuration.hxx>
-#include <TapeVM/InputStream/InputSource.hpp>
+#include <TapeVM/Standalone.hxx>
+
 #include <fstream>
 #include <filesystem>
 #include <vector>
 #include <string>
 #include <algorithm>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/InputStream/InputSource.hpp>
+
+namespace tape {
+#else 
+
+#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
+#include <NoctSys/Scripting/TapeVM/InputStream/InputSource.hpp>
+
 namespace noct {
+#endif 
+
   class TapeAPI FileInputSource 
     : public InputSource
   {

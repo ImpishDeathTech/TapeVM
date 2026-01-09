@@ -4,11 +4,24 @@
  */
 #pragma once 
 
-#include <TapeVM/Configuration.hxx>
-#include <TapeVM/OutputStream/OutputSource.hpp>
+#include <TapeVM/Standalone.hxx>
+
 #include <cstdio>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/OutputStream/OutputSource.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
+#include <NoctSys/Scripting/TapeVM/OutputStream/OutputSource.hpp>
+
 namespace noct {
+#endif 
+
   class TapeAPI StdoutSource 
     : public OutputSource<char>
   {

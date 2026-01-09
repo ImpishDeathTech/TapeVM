@@ -1,12 +1,14 @@
+#pragma once
 /* TapeVM/Configuration.hxx
- * Copyright (c) 2025, Christopher Stephen Rafuse
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#pragma once
+
 
 #define TAPE_VERSION_MAJOR 1
 #define TAPE_VERSION_MINOR 0
 #define TAPE_VERSION_PATCH 0
+#define TAPE_RELEASE       false 
 
 #if defined(TAPE_STANDALONE)
   #if defined(_WIN32)

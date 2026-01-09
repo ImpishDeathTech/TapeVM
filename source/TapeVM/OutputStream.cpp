@@ -2,9 +2,22 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
+#include <TapeVM/Standalone.hxx>
+
 #include <TapeVM/OutputStream.hpp>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM/OutputStream.hpp>
+
+namespace tape {
+#else 
+
+#include <NoctSys/Scripting/TapeVM/OutputStream.hpp>
+
 namespace noct {
+#endif 
+
   void OutputStream::reset() {
     m_source = nullptr;
   }

@@ -4,10 +4,21 @@
  */
 #pragma once 
 
-#include <TapeAPI/Configuration.hxx>
+#include <TapeVM/Standalone.hxx>
 #include <cstdio>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM/Configuration.hxx>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
+
 namespace noct {
+#endif 
+
   template<typename CharT>
   class TapeAPI OutputSource 
   {

@@ -4,7 +4,14 @@
  */
 #pragma once 
 
-// Noctsys Headers
+#include <TapeVM/Standalone.hxx>
+
+// Standard Library Headers
+#include <memory>
+#include <string>
+
+#if defined(TAPE_STANDALONE)
+
 #include <TapeVM/Configuration.hxx>
 #include <TapeVM/OutputStream/OutputSource.hpp>
 #include <TapeVM/OutputStream/StdoutSource.hpp>
@@ -12,11 +19,19 @@
 #include <TapeVM/OutputStream/StringOutputSource.hpp>
 #include <TapeVM/OutputStream/StderrSource.hpp>
 
-// Standard Library Headers
-#include <memory>
-#include <string>
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
+#include <NoctSys/Scripting/TapeVM/OutputStream/OutputSource.hpp>
+#include <NoctSys/Scripting/TapeVM/OutputStream/StdoutSource.hpp>
+#include <NoctSys/Scripting/TapeVM/OutputStream/FileOutputSource.hpp>
+#include <NoctSys/Scripting/TapeVM/OutputStream/StringOutputSource.hpp>
+#include <NoctSys/Scripting/TapeVM/OutputStream/StderrSource.hpp>
 
 namespace noct {
+#endif 
+
   class TapeAPI OutputStream 
   {
     StdoutSource                         m_stdout;

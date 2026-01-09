@@ -4,9 +4,7 @@
  */
 #pragma once 
 
-#include <TapeVM/Configuration.hxx>
-#include <TapeVM/InputStream.hpp>
-#include <TapeVM/OutputStream.hpp>
+#include <TapeVM/Standalone.hxx>
 
 #include <cstdint>
 #include <atomic>
@@ -15,15 +13,25 @@
 #include <mutex>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <utility>
 #include <functional>
 
-#define TAPE_VERSION_MAJOR 1 
-#define TAPE_VERSION_MINOR 0
-#define TAPE_VERSION_PATCH 0
+#if defined(TAPE_STANDALONE)
 
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/InputStream.hpp>
+#include <TapeVM/OutputStream.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
+#include <NoctSys/Scripting/TapeVM/InputStream.hpp>
+#include <NoctSys/Scripting/TapeVM/OutputStream.hpp>
 
 namespace noct {
+#endif 
 
   class TapeAPI TapeVM
   {
@@ -71,7 +79,8 @@ namespace noct {
     };
 
     typedef std::vector<XToken>                  XVector;
-    typedef std::map<std::string, WordTag>       Dictionary;
+    typedef std::unordered_map<std::string, WordTag>       
+                                                 Dictionary;
 
     struct MemTag {
       std::size_t    size;

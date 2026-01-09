@@ -2,17 +2,29 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM.hpp>
-#include <TapeVM/TapeError.hpp>
+#include <TapeVM/Standalone.hxx>
+
 #include <cassert>
 #include <cmath>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
+
+namespace tape {
+#else 
+
+#include <NoctSys/Scripting/TapeVM.hpp>
+#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
+
 namespace noct {
+#endif
 
   TapeVM::TapeVM() 
     : m_stack(), m_fstack(), m_dict(), m_exec(), m_mem(), m_mode(TapeVM::InputMode::Interpreting)
   {
-#if defined(__NoctSys_Unix__) 
+#if defined(__TapeVM_UNIX__) || defined(__NoctSys_UNIX__)
     m_includeDirectories = {
       "/usr/share/tapevm/libraries/?.tape",
       "/usr/share/tapevm/libraries/?.fth",
@@ -30,7 +42,7 @@ namespace noct {
       "./?.fs",
       "./?.f"
     };
-#elif defined(__NoctSys_Windows__)
+#elif defined(__TapeVM_Windows__) || defined(__NoctSys_Windows__)
     m_includeDirectories = { 
       "C:\\ProgramFiles\\TapeVM\\tape\\?.tape",
       "C:\\ProgramFiles\\TapeVM\\tape\\?.fth",
@@ -65,10 +77,10 @@ namespace noct {
   }
 
   std::string TapeVM::convertModname(std::string modname) {
-#if defined(__NoctSys_UNIX__)
+#if defined(__TapeVM_UNIX__) || defined(__NoctSys_UNIX__)
     std::replace(modname.begin(), modname.end(), '.', '/');
 
-#elif defined(__NoctSys_Windows__);
+#elif defined(__TapeVM_Windows__) || defined(__NoctSys_Windows__)
     std::replace(modname.begin(), modname.end(), '.', '\\');
 #endif 
     return modname;
@@ -76,8 +88,9 @@ namespace noct {
 
   std::string TapeVM::convertDirectory(std::string directory, const std::string& modname) {
     static const std::string re  = "?";
-
-    std::replace(directory.begin(), directory.end(), re, modname);
+    auto                     pos = directory.find(re);
+    
+    directory.replace(pos, re.length(), modname);
     return directory;
   }
 
@@ -408,11 +421,14 @@ namespace noct {
     switch (word[0]) {
       case '#':
       {
-        bool n = false;
+        bool sign = false;
         for (auto i = 1; i < word.length(); i++) {
-          if (!std::isdigit(word[i]))
-            if (word[i] == '-' && i == 1 && !n) n = true;
+          if (!std::isdigit(word[i])) {
+            if ((i == 1) && (word[i] == '-' || word[i] == '+') && !sign) 
+              sign = true;
+
             else return false;
+          }
         }
       } break;
 
@@ -438,51 +454,52 @@ namespace noct {
   }
 
   bool TapeVM::isRealnum(const std::string& word) {
-    bool        p = false,
-                e = false,
-                m = false,
-                n = false;
-    std::size_t i = 0;
+    const auto ln = word.size();
+    auto       i  = 0;
 
-    if (word[i] != '&')
+    if (ln < 2 || word[i++] != '&')
       return false;
-    
-    if (word[++i] == '-') {
-      n = true;
-      i++;
-    }
 
-    for (; i < word.length(); i++) {
+    if (i < ln && (word[i] == '+' || word[i] == '-'))
+      ++i;
+    
+    bool hasDigit = false,
+         hasDot   = false;
+    
+    while (i < ln) {
       char ch = word[i];
 
-      if (!std::isdigit(ch)) {
-        switch (ch) {
-          case '.': 
-            if (!p) p = true;
-            else return false;
-            break;
-
-          case 'e':
-            if (!e) e = true;
-            else return false;
-            break;
-
-          case '-':
-            if (e && !m) m = true;
-            else return false;
-            break;
-
-          case '+':
-            if (e && !m) m = true;
-            else return false;
-            break;
-          
-          default:
-            return false;
-        }
+      if (std::isdigit(ch)) {
+        hasDigit = true; 
+        ++i;
       }
+      else if (ch == '.' && !hasDot) {
+        hasDot = true;
+        ++i;
+      }
+      else break;
     }
-    return true;
+
+    if (!hasDigit)
+      return false;
+
+    if (i < ln && (word[i] == 'e' || word[i] == 'E')) {
+      bool expDigit = false;
+      ++i;
+
+      if (i < ln && (word[i] == '+' || word[i] == '-'))
+        ++i;
+
+      while (i < ln && std::isdigit(word[i])) {
+        expDigit = true;
+        ++i;
+      }
+
+      if (!expDigit)
+        return false;
+    }
+
+    return i == ln;
   }
 
 
@@ -494,7 +511,10 @@ namespace noct {
     translation.erase(0, 1);
 
     switch (prefix) {
-      case '#': output = (std::uintptr_t)std::stol(translation); break;
+      case '#': 
+        output = static_cast<std::uintptr_t>(std::stol(translation, nullptr, 10)); 
+        break;
+
       case '$': output = std::stoul(translation, nullptr, 16);   break;
       case '%': output = std::stoul(translation, nullptr, 2);    break;
     }

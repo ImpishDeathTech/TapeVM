@@ -2,14 +2,27 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM.hpp>
-#include <TapeVM/TapeError.hpp>
+#include <TapeVM/Standalone.hxx>
+
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM.hpp>
+#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
+
 namespace noct {
+#endif
+
   void TapeVM::loadCompilerPrimitives() {
     addWord(":", [=](TapeVM&){
       std::string name = getNext();

@@ -2,14 +2,26 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM.hpp>
-#include <TapeVM/TapeError.hpp>
+#include <TapeVM/Standalone.hxx>
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM.hpp>
+#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
+
 namespace noct {
+#endif
+
   void TapeVM::loadParsingWords() {
     addWord("\\", [=](TapeVM&){
       for (auto ch = input().get(); ch != '\n'; ch = input().get());
@@ -72,7 +84,7 @@ namespace noct {
 
     setImmediate("(**");
 
-    addWord("s\"", [=](TapeVM&){
+    addWord("S\"", [=](TapeVM&){
       if (getInputMode() == TapeVM::InputMode::Interpreting) {
         std::string str;
         char*       cstr = nullptr;
@@ -81,19 +93,19 @@ namespace noct {
           str += ch;
 
         auto  data = allot(str.length());
-        char* cstr = reinterpret_cast<char*>(data);
+              cstr = reinterpret_cast<char*>(data);
 
         std::strncpy(cstr, str.c_str(), str.length());
 
         push(data);
         push(str.length());
       } 
-      else throw TapeError("Interpret Only Word: use 'c\"' when compiling", "s\"");
+      else throw TapeError("Interpret Only Word: use 'C\"' when compiling", "S\"");
     });
 
-    setImmediate("s\"");
+    setImmediate("S\"");
 
-    addWord("c\"", [=](TapeVM&){
+    addWord("C\"", [=](TapeVM&){
       if (getInputMode()== TapeVM::InputMode::Compiling) {
         std::string str;
         char*       cstr = nullptr;
@@ -102,7 +114,7 @@ namespace noct {
           str += ch;
 
         auto  data = alloc(str.length());
-        char* cstr = reinterpret_cast<char*>(data);
+              cstr = reinterpret_cast<char*>(data);
 
         std::strncpy(cstr, str.c_str(), str.length());
 
@@ -112,12 +124,12 @@ namespace noct {
         compileInline(getLastDefinition(), lit, str.length());
         findMem(data)->pinned = true;
       }
-      else throw TapeError("Compile Only Word", "c\"");
+      else throw TapeError("Compile Only Word", "C\"");
     });
 
-    setImmediate("c\"");
+    setImmediate("C\"");
 
-    addWord("parse", [=](TapeVM&){
+    addWord("PARSE", [=](TapeVM&){
       if (stackSize()) {
         char        delim = char(pop() % CHAR_MAX);
         std::string str;
@@ -134,10 +146,10 @@ namespace noct {
         push(data);
         push(str.length());
       }
-      else throw TapeError("Stack Underflow", "parse");
+      else throw TapeError("Stack Underflow", "PARSE");
     });
 
-    addWord("parse-name", [=](TapeVM&){
+    addWord("PARSE-NAME", [=](TapeVM&){
       std::string name   = getNext();
       auto        data   = allot(name.length());
       char*       buffer = reinterpret_cast<char*>(data);
@@ -163,8 +175,6 @@ namespace noct {
 
       else throw TapeError("Unknown Word", name);
     });
-
-    
   }
 
 }

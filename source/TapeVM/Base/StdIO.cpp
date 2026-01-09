@@ -2,13 +2,25 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM.hpp>
-#include <TapeVM/TapeError.hpp>
+#include <TapeVM/Standalone.hxx>
 
 #include <cstring>
 #include <cassert>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM.hpp>
+#include <NoctSys/TapeVM/Exception/TapeError.hpp>
+
 namespace noct {
+#endif
+
   InputStream& TapeVM::input() {
     return m_input;
   }
@@ -34,19 +46,19 @@ namespace noct {
   }
 
   void TapeVM::loadStdIO() {
-    addWord("emit", [=](TapeVM&){
+    addWord("EMIT", [=](TapeVM&){
       if (stackSize()) {
         auto ch = static_cast<char>(pop());
         output().put(ch);
       }
-      else throw TapeError("Stack Underflow", "emit");
+      else throw TapeError("Stack Underflow", "EMIT");
     });
 
-    addWord("cr", [=](TapeVM&){
+    addWord("CR", [=](TapeVM&){
       output().newline();
     });
 
-    addWord("type", [=](TapeVM&){
+    addWord("TYPE", [=](TapeVM&){
       if (stackSize() >= 2) {
         auto  len  = static_cast<std::size_t>(pop());
         auto* str  = reinterpret_cast<char*>(pop());
@@ -55,7 +67,7 @@ namespace noct {
       else throw TapeError("StackUnderflow", "type");
     });
 
-    addWord("space", [=](TapeVM&){
+    addWord("SPACE", [=](TapeVM&){
       output().put(' ');
     });
 
@@ -67,7 +79,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", ".");
     });
 
-    addWord("u.", [=](TapeVM&){
+    addWord("U.", [=](TapeVM&){
       if (stackSize()) {
         auto v = static_cast<unsigned>(pop());
         output() << v;
@@ -75,7 +87,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", ".");
     });
 
-    addWord("f.", [=](TapeVM&){
+    addWord("F.", [=](TapeVM&){
       if (fstackSize()) {
         auto v = fpop();
         output() << v;
@@ -83,7 +95,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", ".");
     });
 
-    addWord(".s", [=](TapeVM&){
+    addWord(".S", [=](TapeVM&){
       output() << "stack <" << stackSize() << "> ";
 
       for (auto i = 0; i < stackSize(); i++)
@@ -91,7 +103,7 @@ namespace noct {
 
     });
 
-    addWord("U.s", [=](TapeVM&){
+    addWord("U.S", [=](TapeVM&){
       output() << "stack <" << stackSize() << "> ";
       
       for (auto i = 0; i < stackSize(); i++)
@@ -99,8 +111,8 @@ namespace noct {
 
     });
 
-    addWord("f.s", [=](TapeVM&){
-      output() << "stack <" << fstackSize() << "> ";
+    addWord("F.S", [=](TapeVM&){
+      output() << "fstack <" << fstackSize() << "> ";
       
       for (auto i = 0; i < fstackSize(); i++)
         output() << fat(i) << ' ';
@@ -109,7 +121,6 @@ namespace noct {
 
     addWord(">OUT", [=](TapeVM&){
       if (stackSize() == 2) {
-        std::string path;
         auto  len = static_cast<std::size_t>(pop());
         auto* str = reinterpret_cast<char*>(pop());
         std::string path(str, len);

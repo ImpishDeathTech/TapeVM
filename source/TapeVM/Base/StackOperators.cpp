@@ -2,15 +2,27 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM.hpp>
-#include <TapeVM/TapeError.hpp>
+#include <TapeVM/Standalone.hxx>
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM.hpp>
+#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
+
 namespace noct {
+#endif
+
   void TapeVM::loadStackOperators() {
     addWord("+", [=](TapeVM&){
       if (stackSize() >= 2) {
@@ -59,35 +71,35 @@ namespace noct {
       else throw TapeError("Stack Underflow", "+");
     });
 
-    addWord("swap", [=](TapeVM&){
+    addWord("SWAP", [=](TapeVM&){
       if (stackSize() >= 2)
         std::swap(top(), at(stackSize()-2));
         
-      else throw TapeError("Stack Underflow", "swap");
+      else throw TapeError("Stack Underflow", "SWAP");
     });
 
-    addWord("dup", [=](TapeVM&){
+    addWord("DUP", [=](TapeVM&){
       if (stackSize())
         push(top());
         
-      else throw TapeError("Stack Underflow", "dup");
+      else throw TapeError("Stack Underflow", "DUP");
     });
 
-    addWord("drop", [=](TapeVM&){
+    addWord("DROP", [=](TapeVM&){
       if (stackSize())
         pop();
         
-      else throw TapeError("Stack Underflow", "drop");
+      else throw TapeError("Stack Underflow", "DROP");
     });
 
-    addWord("over", [=](TapeVM&){
+    addWord("OVER", [=](TapeVM&){
       if (stackSize() >= 2) {
         push(at(stackSize()-2));
       }
-      else throw TapeError("Stack Underflow", "over");
+      else throw TapeError("Stack Underflow", "OVER");
     });
 
-    addWord("rot", [=](TapeVM&){
+    addWord("ROT", [=](TapeVM&){
       if (stackSize() >= 3) {
         auto a = top();
         auto b = stackSize() - 2,
@@ -97,7 +109,7 @@ namespace noct {
         at(c)  = a;
 
       }
-      else throw TapeError("Stack Underflow", "rot");
+      else throw TapeError("Stack Underflow", "ROT");
     });
 
     addWord("=", [=](TapeVM&){
@@ -164,51 +176,51 @@ namespace noct {
       }
     });
 
-    addWord("i>f", [=](TapeVM&){
+    addWord("S>F", [=](TapeVM&){
       if (stackSize())
         fpush((float)pop());
 
-      else throw TapeError("Stack Underflow", "i>f");
+      else throw TapeError("Stack Underflow", "S>F");
     });
 
-    addWord("f+", [=](TapeVM&){
+    addWord("F+", [=](TapeVM&){
       if (fstackSize() >= 2) {
         auto a = fpop(),
              b = fpop();
         fpush(a+b);
       }
-      else throw TapeError("Stack Underflow", "f+");
+      else throw TapeError("Stack Underflow", "F+");
     });
 
-    addWord("f-", [=](TapeVM&){
+    addWord("F-", [=](TapeVM&){
       if (fstackSize() >= 2) {
         auto a = fpop(),
              b = fpop();
         fpush(b-a);
       }
-      else throw TapeError("Stack Underflow", "f-");
+      else throw TapeError("Stack Underflow", "F-");
     });
 
-    addWord("f/", [=](TapeVM&){
+    addWord("F/", [=](TapeVM&){
       if (fstackSize() >= 2) {
         auto a = fpop(),
              b = fpop();
         fpush(b/a);
       }
-      else throw TapeError("Stack Underflow", "f/");
+      else throw TapeError("Stack Underflow", "F/");
     });
 
-    addWord("f*", [=](TapeVM&){
+    addWord("F*", [=](TapeVM&){
       if (fstackSize() >= 2) {
         auto a = fpop(),
              b = fpop();
         fpush(a*b);
       }
 
-      else throw TapeError("Stack Underflow", "f*");
+      else throw TapeError("Stack Underflow", "F*");
     });
 
-    addWord("f%", [=](TapeVM&){
+    addWord("F%", [=](TapeVM&){
       if (fstackSize() >= 2) {
         auto a = fpop(),
              b = fpop();
@@ -218,35 +230,35 @@ namespace noct {
       else throw TapeError("Stack Underflow", "f+");
     });
 
-    addWord("fswap", [=](TapeVM&){
+    addWord("FSWAP", [=](TapeVM&){
       if (fstackSize() >= 2)
         std::swap(ftop(), fat(fstackSize()-2));
         
-      else throw TapeError("Stack Underflow", "fswap");
+      else throw TapeError("Stack Underflow", "FSWAP");
     });
 
-    addWord("fdup", [=](TapeVM&){
+    addWord("FDUP", [=](TapeVM&){
       if (stackSize())
         fpush(ftop());
         
-      else throw TapeError("Stack Underflow", "fdup");
+      else throw TapeError("Stack Underflow", "FDUP");
     });
 
-    addWord("fdrop", [=](TapeVM&){
+    addWord("FDROP", [=](TapeVM&){
       if (fstackSize())
         fpop();
         
-      else throw TapeError("Stack Underflow", "fdrop");
+      else throw TapeError("Stack Underflow", "FDROP");
     });
 
-    addWord("fover", [=](TapeVM&){
+    addWord("FOVER", [=](TapeVM&){
       if (fstackSize() >= 2) {
         fpush(fat(fstackSize()-2));
       }
-      else throw TapeError("Stack Underflow", "fover");
+      else throw TapeError("Stack Underflow", "FOVER");
     });
 
-    addWord("frot", [=](TapeVM&){
+    addWord("FROT", [=](TapeVM&){
       if (fstackSize() >= 3) {
         auto a = ftop();
         auto b = fstackSize() - 2,
@@ -256,14 +268,14 @@ namespace noct {
         fat(c) = a;
 
       }
-      else throw TapeError("Stack Underflow", "frot");
+      else throw TapeError("Stack Underflow", "FROT");
     });
 
-    addWord("f>i", [=](TapeVM&){
+    addWord("F>S", [=](TapeVM&){
       if (fstackSize())
         push((std::uintptr_t)fpop());
       
-      else throw TapeError("Stack Underflow", "f>i");
+      else throw TapeError("Stack Underflow", "F>S");
     });
 
     addWord(">R", [=](TapeVM&){

@@ -4,11 +4,24 @@
  */
 #pragma once 
 
-#include <TapeVM/Configuration.hxx>
-#include <TapeVM/OutputStream/OutputSource.hpp>
+#include <TapeVM/Standalone.hxx>
+
 #include <cstdio>
 
+#if defined(TAPE_STANDALONE)
+
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/OutputStream/OutputSource.hpp>
+
+namespace tape {
+#else
+
+#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
+#include <NoctSys/Scripting/TapeVM/OutputStream/OutputSource.hpp>
+
 namespace noct {
+#endif
+
   class TapeAPI FileOutputSource 
     : public OutputSource<char>
   {
@@ -16,14 +29,8 @@ namespace noct {
     
   public:
 
-    explicit FileOutputSource(std::FILE* fd)
-      : m_fd(fd)
-    {}
-
-    ~FileOutputSource() {
-      if (m_fd)
-        std::fclose(m_fd);
-    }
+    explicit FileOutputSource(std::FILE* fd);
+    ~FileOutputSource();
     
     void write(const char* data, std::size_t size) override;
     void put(char ch)                              override;
