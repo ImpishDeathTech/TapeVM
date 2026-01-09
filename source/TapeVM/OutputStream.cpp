@@ -2,7 +2,7 @@
  * Copyright (c) 2020-2025, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <NoctSys/Scripting/TapeVM/OutputStream.hpp>
+#include <TapeVM/OutputStream.hpp>
 
 namespace noct {
   void OutputStream::reset() {
@@ -55,5 +55,6 @@ namespace noct {
   StringOutputSource* OutputStream::getCurrentStringSource() {
     return reinterpret_cast<StringOutputSource*>(m_source);
   }
+
 
 }
