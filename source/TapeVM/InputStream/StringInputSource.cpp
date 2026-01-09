@@ -1,8 +1,8 @@
 /* TapeVM/InputStream/StringInputSource.cpp
- * Copyright (c) 2020-2025, Christopher Stephen Rafuse
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <NoctSys/Scripting/TapeVM/InputStream/StringInputSource.hpp>
+#include <TapeVM/InputStream/StringInputSource.hpp>
 
 namespace noct {
   bool StringInputSource::eof() const {
@@ -16,4 +16,5 @@ namespace noct {
   void StringInputSource::unget() {
     m_stream.unget();
   }
+
 }
