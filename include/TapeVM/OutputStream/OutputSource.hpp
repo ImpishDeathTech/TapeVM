@@ -1,11 +1,11 @@
 #pragma once 
 
-#include <NoctSys/Configuration.hxx>
+#include <TapeAPI/Configuration.hxx>
 #include <cstdio>
 
 namespace noct {
   template<typename CharT>
-  class NoctSysAPI OutputSource 
+  class TapeAPI OutputSource 
   {
   public:
     virtual ~OutputSource()                                = default;
@@ -15,6 +15,7 @@ namespace noct {
 
     virtual void flush() {}
   };
+
 
 
 }
