@@ -1,4 +1,4 @@
-/* OutputStream.hpp
+/* TapeVM/OutputStream.hpp
  * Copyright (c) 2020-2025, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
@@ -72,3 +72,4 @@ namespace noct {
     }
   };
 }
+
