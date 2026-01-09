@@ -1,3 +1,7 @@
+/* TapeVM/OutputStream/OutputSource.hpp
+ * Copyright (c) 2020-2025, Christopher Stephen Rafuse
+ * BSD-2-Clause
+ */
 #pragma once 
 
 #include <TapeAPI/Configuration.hxx>
@@ -19,3 +23,4 @@ namespace noct {
 
 
 }
+
