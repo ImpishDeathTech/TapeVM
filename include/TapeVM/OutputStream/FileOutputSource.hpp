@@ -1,5 +1,5 @@
 /* TapeVM/OutputStream/FileOutputSource.hpp
- * Copyright (c) 2020-2025, Christopher Stephen Rafuse
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
 #pragma once 
@@ -31,3 +31,4 @@ namespace noct {
   };
 
 }
+
