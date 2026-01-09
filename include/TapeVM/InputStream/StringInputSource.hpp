@@ -1,10 +1,10 @@
-/* StringInputSource.hpp
+/* TapeVM/InputStream/StringInputSource.hpp
  * Copyright (c) 2020-2025, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
 #pragma once 
-#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
-#include <NoctSys/Scripting/TapeVM/InputStream/InputSource.hpp>
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/InputStream/InputSource.hpp>
 #include <sstream>
 
 namespace noct {
@@ -22,4 +22,5 @@ namespace noct {
     int  get()       override;
     void unget()     override;
   };
+
 }
