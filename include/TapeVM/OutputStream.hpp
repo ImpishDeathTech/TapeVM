@@ -5,12 +5,12 @@
 #pragma once 
 
 // Noctsys Headers
-#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
-#include <NoctSys/Scripting/TapeVM/OutputStream/OutputSource.hpp>
-#include <NoctSys/Scripting/TapeVM/OutputStream/StdoutSource.hpp>
-#include <NoctSys/Scripting/TapeVM/OutputStream/FileOutputSource.hpp>
-#include <NoctSys/Scripting/TapeVM/OutputStream/StringOutputSource.hpp>
-#include <NoctSys/Scripting/TapeVM/OutputStream/StderrSource.hpp>
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/OutputStream/OutputSource.hpp>
+#include <TapeVM/OutputStream/StdoutSource.hpp>
+#include <TapeVM/OutputStream/FileOutputSource.hpp>
+#include <TapeVM/OutputStream/StringOutputSource.hpp>
+#include <TapeVM/OutputStream/StderrSource.hpp>
 
 // Standard Library Headers
 #include <memory>
@@ -72,4 +72,5 @@ namespace noct {
     }
   };
 }
+
 
