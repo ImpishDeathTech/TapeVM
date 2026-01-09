@@ -1,11 +1,11 @@
-/* StdoutSource.hpp
- * Copyright (c) 2020-2025, Christopher Stephen Rafuse
+/* TapeVM/OutputStream/StdoutSource.hpp
+ * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
 #pragma once 
 
-#include <NoctSys/Configuration.hxx>
-#include <NoctSys/Scripting/TapeVM/OutputStream/OutputSource.hpp>
+#include <TapeVM/Configuration.hxx>
+#include <TapeVM/OutputStream/OutputSource.hpp>
 #include <cstdio>
 
 namespace noct {
@@ -17,4 +17,5 @@ namespace noct {
     void put(char ch)                              override;
     void flush()                                   override;
   };
+
 }
