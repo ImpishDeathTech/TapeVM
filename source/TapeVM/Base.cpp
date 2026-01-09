@@ -2,8 +2,8 @@
  * Copyright (c) 2020-2025, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/Exception/TapeError.hpp>
+#include <TapeVM.hpp>
+#include <TapeVM/TapeError.hpp>
 
 #include <cassert>
 #include <cmath>
@@ -44,4 +44,5 @@ namespace noct {
       throw TapeError("Module Not Found", modname);
     });
   }
+
 }
