@@ -2,7 +2,7 @@
  * Copyright (c) 2020-2025, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <NoctSys/Scripting/TapeVM/InputStream.hpp>
+#include <TapeVM/InputStream.hpp>
 #include <cstdio>
 
 namespace noct {
@@ -36,4 +36,5 @@ namespace noct {
     if (!m_stack.empty())
       m_stack.back()->unget();
   }
+
 }
