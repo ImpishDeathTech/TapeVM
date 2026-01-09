@@ -25,7 +25,7 @@
 
 namespace noct {
 
-  class NoctSysAPI TapeVM
+  class TapeAPI TapeVM
   {
     std::vector<std::uintptr_t>     m_stack;
     std::vector<std::uintptr_t>     m_rstack;
@@ -209,3 +209,4 @@ namespace noct {
   };
 
 }
+
