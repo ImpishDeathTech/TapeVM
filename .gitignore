@@ -19,3 +19,5 @@ build\Base.cpp.o
 build\TapeVM.cpp.o
 library
 library\tapevm.dll
+test.exe
+Main.o
