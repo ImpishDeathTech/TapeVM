@@ -157,13 +157,13 @@ namespace noct {
     std::uintptr_t  allot(std::size_t sz);
     bool            isScratchData(std::uintptr_t p);
     void            resetScratchArena(ScratchReset r);
-    void            reserveScratchArena(std::size_t reserve);
+    void            reserveScratchArena(std::size_t res);
 
     std::uintptr_t  alloc(std::size_t sz);
     std::uintptr_t  realloc(std::uintptr_t p, std::size_t sz);
     void            freeMem(std::uintptr_t p);
     MemTag*         findMem(std::uintptr_t p);
-    void            setPinned(std::uintptr_t word, bool flag=true);
+    void            setPinned(std::uintptr_t addr, bool flag=true);
 
     void            push(std::uintptr_t cell);
     std::uintptr_t& top();

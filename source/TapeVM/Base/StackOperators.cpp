@@ -160,7 +160,7 @@ namespace noct {
       }
     });
 
-    addWord("|", [=](TapeVM&){
+    addWord("OR", [=](TapeVM&){
       if (stackSize() >= 2) {
         auto a = pop(),
              b = pop();
@@ -168,7 +168,7 @@ namespace noct {
       }
     });
 
-    addWord("&", [=](TapeVM&){
+    addWord("AND", [=](TapeVM&){
       if (stackSize() >= 2) {
         auto a = pop(),
              b = pop();

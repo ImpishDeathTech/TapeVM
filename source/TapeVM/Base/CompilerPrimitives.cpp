@@ -312,11 +312,11 @@ namespace noct {
 
     addWord("[']", [=](TapeVM&){
       if (getInputMode() == TapeVM::InputMode::Compiling) {
-        std::string name   = getNext();
-        auto*       xtoken = findWord(name);
+        std::string name = getNext();
+        auto*       tag  = findWord(name);
         
-        if (xtoken)
-          compileInline(getLastDefinition(), findWord("LIT")->code[0].func, reinterpret_cast<std::uintptr_t>(xtoken));
+        if (tag)
+          compileInline(getLastDefinition(), findWord("LIT")->code[0].func, reinterpret_cast<std::uintptr_t>(tag));
         else throw TapeError("Unknown Word", name);
       } 
       else throw TapeError("Compile Only Word", "[']");

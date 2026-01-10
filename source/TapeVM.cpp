@@ -217,7 +217,8 @@ namespace noct {
   void TapeVM::resetScratchArena(TapeVM::ScratchReset reset) {
     switch (reset) {
       case TapeVM::ScratchReset::Line:
-      case TapeVM::ScratchReset::Definition:
+      case TapeVM::ScratchReset::Definition:  
+      case TapeVM::ScratchReset::ClearStacks:
         m_smem.dp = 0ul;
     }
   }
@@ -419,7 +420,7 @@ namespace noct {
 
     bool TapeVM::isInteger(const std::string& word) {
     switch (word[0]) {
-      case '#':
+      case '&':
       {
         bool sign = false;
         for (auto i = 1; i < word.length(); i++) {
@@ -431,6 +432,13 @@ namespace noct {
           }
         }
       } break;
+
+      case '#':
+        for (auto i = 1; i < word.length(); i++) {
+          if (!std::isdigit(word[i]))
+            return false;
+        }
+        break;
 
       case '$':
         for (auto i = 1; i < word.length(); i++) {
@@ -511,12 +519,13 @@ namespace noct {
     translation.erase(0, 1);
 
     switch (prefix) {
-      case '#': 
+      case '&': 
         output = static_cast<std::uintptr_t>(std::stol(translation, nullptr, 10)); 
         break;
 
-      case '$': output = std::stoul(translation, nullptr, 16);   break;
-      case '%': output = std::stoul(translation, nullptr, 2);    break;
+      case '#': output = std::stoul(translation, nullptr, 10); break;
+      case '$': output = std::stoul(translation, nullptr, 16); break;
+      case '%': output = std::stoul(translation, nullptr, 2);  break;
     }
 
     return output;

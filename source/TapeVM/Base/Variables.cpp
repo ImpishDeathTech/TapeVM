@@ -35,11 +35,22 @@ namespace noct {
     addWord("CREATE", [=](TapeVM&){
       std::string name = getNext();
       addWord(name, findWord("(LIT)")->code[0].func, 0ul);
+      push(reinterpret_cast<std::uintptr_t>(&(findWord(name)->code[0].data)));
       setAllocating(true);
     });
 
     addWord("ALLOT", [=](TapeVM&){
-      if (stackSize()) {
+      if (isAllocating()) {
+        if (stackSize() >= 2) {
+          auto  size   = pop();
+          auto* data = reinterpret_cast<std::uintptr_t*>(pop());
+          *data      = alloc(size);
+        }
+        else if (stackSize() == 1) pop();
+        else throw TapeError("Stack Underflow", "ALLOT");
+        setAllocating(false);
+      }
+      else if (stackSize()) {
         auto sz = pop();
         auto p  = allot(sz);
         push(p);
@@ -49,27 +60,29 @@ namespace noct {
 
     addWord("ALLOC", [=](TapeVM&){
       if (isAllocating()) {
-        if (stackSize()) {
-          auto sz = pop();
-          compileInline(getLastDefinition(), findWord("(END)")->code[0].func, alloc(sz));
-          setAllocating(false);
+        if (stackSize() >= 2) {
+          auto  size = pop();
+          auto* data = reinterpret_cast<std::intptr_t*>(pop());
+          *data = alloc(size);
         }
+        else if (stackSize() == 1) pop();
         else throw TapeError("Stack Underflow", "ALLOC");
+        setAllocating(false);
       }
       else if (stackSize()) {
         auto sz = pop();
         auto p  = alloc(sz);
         push(p);
       }
-      else throw TapeError("Stack Underflow", "alloc");
+      else throw TapeError("Stack Underflow", "ALLOC");
     });
 
-    addWord("free", [=](TapeVM&){
+    addWord("FREE", [=](TapeVM&){
       if (stackSize()) {
         auto p = pop();
 
         if (!findMem(p))
-          throw TapeError("Not a valid adress", std::to_string(p));
+          throw TapeError("Not a valid adress: " + std::to_string(p), "FREE");
         
         freeMem(p);
       }
@@ -77,8 +90,22 @@ namespace noct {
 
     addWord("@", [=](TapeVM&){
       if (stackSize()) {
-        auto addr = pop();
-        push(*(std::uintptr_t*)addr);
+        auto* addr = reinterpret_cast<std::uintptr_t*>(pop());
+        if (addr)
+          push(*addr);
+
+        else throw TapeError("Dereferenced NULL! X,..,x You FUCK!!!", "@");
+      }
+      else throw TapeError("Stack Underflow", "@");
+    });
+
+    addWord("C@", [=](TapeVM&){
+      if (stackSize()) {
+        auto* str = reinterpret_cast<char*>(pop());
+        if (str)
+          push(str[0]);
+
+        else throw TapeError("Dereferenced NULL! X,..,x You FUCK!!!", "C@");
       }
       else throw TapeError("Stack Underflow", "@");
     });
@@ -87,27 +114,49 @@ namespace noct {
       if (stackSize() >= 2) {
         auto  a = pop(),
               b = pop();
-        auto* c = reinterpret_cast<std::uintptr_t*>(a);
-        *c = b;
+        auto* p = reinterpret_cast<std::uintptr_t*>(a);
+        if (p)
+        *p = b;
       }
     });
 
-    addWord("f@", [=](TapeVM&){
+    addWord("C!", [=](TapeVM&){
+      if (stackSize() >= 2) {
+        auto  a   = pop(),
+              b   = pop();
+        auto* str = reinterpret_cast<char*>(a);
+        if (str)
+          str[0] = b;
+
+        else throw TapeError("Dereferenced NULL! X,..,x You FUCK!!!", "C!");
+      }
+    });
+
+    addWord("F@", [=](TapeVM&){
       if (stackSize()) {
-        auto addr = pop();
-        fpush(*reinterpret_cast<float*>(addr));
+        auto  addr = pop();
+        auto* ptr  = reinterpret_cast<float*>(addr);
+
+        if (ptr) 
+          fpush(*ptr);
+        
+        else throw TapeError("Dereferenced NULL! X,..,x", "F@");
       }
-      else throw TapeError("Stack Underflow", "f@");
+      else throw TapeError("Stack Underflow", "F@");
     });
 
-    addWord("f!", [=](TapeVM&){
+    addWord("F!", [=](TapeVM&){
       if (stackSize() && fstackSize()) {
-        auto   a = pop();
-        float  b = fpop(),
-              *c = reinterpret_cast<float*>(a);
-        *c = b;
+        auto   a   = pop();
+        float  b   = fpop(),
+              *ptr = reinterpret_cast<float*>(a);
+        
+        if (ptr)
+          *ptr = b;
+
+        else throw TapeError("Dereferenced NULL! X,..,x", "F!");
       }
-      else throw TapeError("Stack Underflow", "f!");
+      else throw TapeError("Stack Underflow", "F!");
     });
 
     addWord("CONSTANT", [=](TapeVM&){
