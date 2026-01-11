@@ -2,27 +2,18 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
 
 #include <cassert>
 #include <cmath>
-
-#if defined(TAPE_STANDALONE)
 
 #include <TapeVM.hpp>
 #include <TapeVM/Exception/TapeError.hpp>
 
 namespace tape {
-#else 
-
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
-
-namespace noct {
-#endif
 
   TapeVM::TapeVM() 
     : m_stack(), m_fstack(), m_dict(), m_exec(), m_mem(), m_mode(TapeVM::InputMode::Interpreting)
+      
   {
 #if defined(__TapeVM_UNIX__) || defined(__NoctSys_UNIX__)
     m_includeDirectories = {
@@ -131,7 +122,7 @@ namespace noct {
   }
 
 
-  void TapeVM::addWord(const std::string_view& name, const TapeVM::Function& func, std::uintptr_t data) {
+  void TapeVM::addWord(const std::string_view& name, TapeVM::Function func, std::uintptr_t data) {
     addWord(name);
     auto* token = findWord(name);
     token->code.push_back({func, data});
@@ -195,6 +186,15 @@ namespace noct {
     }
   }
 
+  void TapeVM::process() {
+    std::string token = getNext();
+
+    while (!token.empty()) {
+      processToken(token);
+      token.clear();
+      token = getNext();
+    }
+  }
 
   std::uintptr_t TapeVM::allot(std::size_t size) {
     if (m_smem.dp + size > m_smem.buffer.size())
@@ -408,6 +408,8 @@ namespace noct {
 
     if (ch == EOF)
       return {};
+
+    output.push_back(ch);
 
     for (ch = m_input.get(); ch != EOF && !std::isspace(ch); ch = m_input.get())
       output.push_back(char(ch));

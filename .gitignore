@@ -15,9 +15,12 @@ build\ParsingWords.cpp.o
 build\StackOperators.cpp.o
 build\StdIO.cpp.o
 build\Variables.cpp.o
+build\SizeWords.cpp.o
 build\Base.cpp.o
 build\TapeVM.cpp.o
 library
 library\tapevm.dll
 test.exe
 Main.o
+cpp.out 
+tapevm.dll

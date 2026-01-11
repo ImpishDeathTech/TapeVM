@@ -2,21 +2,9 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
-
-#include <cstdio>
-
-#if defined(TAPE_STANDALONE)
-
 #include <TapeVM/InputStream.hpp>
 
 namespace tape {
-#else 
-
-#include <NoctSys/Scripting/TapeVM/InputStream.hpp>
-
-namespace noct {
-#endif 
 
   void InputStream::push(InputSource* input) {
     m_stack.push_back(std::unique_ptr<InputSource>(input));

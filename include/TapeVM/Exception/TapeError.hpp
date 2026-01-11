@@ -1,21 +1,11 @@
 #pragma once 
 
-#include <TapeVM/Standalone.hxx>
-
 #include <exception>
 #include <string>
-
-#if defined(TAPE_STANDALONE)
 
 #include <TapeVM/Configuration.hxx>
 
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
-
-namespace noct {
-#endif 
 
   class TapeAPI TapeError 
     : public std::exception 

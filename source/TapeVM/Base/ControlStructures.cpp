@@ -2,28 +2,17 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
-#if defined(TAPE_STANDALONE)
-
-#include <TapeVM.hpp>
-#include <TapeVM/Exception/TapeError.hpp>
-
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
-
-namespace noct {
-#endif
 
   void TapeVM::loadControlStructures() {
-    addWord("EXIT", [=](TapeVM&){
+    addWord("EXIT", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Compiling:
           if (m_cstack.back().type == TapeVM::ControlFrame::DO)
@@ -41,7 +30,7 @@ namespace noct {
 
     setImmediate("EXIT");
 
-    addWord("LEAVE", [=](TapeVM&){
+    addWord("LEAVE", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "LEAVE");
 
@@ -67,7 +56,7 @@ namespace noct {
 
     setImmediate("LEAVE");
 
-    addWord("IF", [=](TapeVM&){
+    addWord("IF", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "IF");
 
@@ -81,7 +70,7 @@ namespace noct {
 
     setImmediate("IF");
 
-    addWord("ELSE", [=](TapeVM&){
+    addWord("ELSE", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "ELSE");
 
@@ -102,7 +91,7 @@ namespace noct {
 
     setImmediate("ELSE");
 
-    addWord("THEN", [=](TapeVM&){
+    addWord("THEN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling) 
         throw TapeError("Compile Only Word", "THEN");
       
@@ -119,7 +108,7 @@ namespace noct {
 
     setImmediate("THEN");
 
-    addWord("BEGIN", [=](TapeVM&){
+    addWord("BEGIN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "BEGIN");
 
@@ -129,7 +118,7 @@ namespace noct {
 
     setImmediate("BEGIN");
 
-    addWord("AGAIN", [=](TapeVM&){
+    addWord("AGAIN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "AGAIN");
 
@@ -152,7 +141,7 @@ namespace noct {
 
     setImmediate("AGAIN");
 
-    addWord("UNTIL", [=](TapeVM&){
+    addWord("UNTIL", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "UNTIL");
 
@@ -174,7 +163,7 @@ namespace noct {
 
     setImmediate("UNTIL");
 
-    addWord("WHILE", [=](TapeVM&){
+    addWord("WHILE", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "WHILE");
 
@@ -190,7 +179,7 @@ namespace noct {
 
     setImmediate("WHILE");
 
-    addWord("REPEAT", [=](TapeVM&){
+    addWord("REPEAT", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "REPEAT");
 
@@ -223,21 +212,21 @@ namespace noct {
 
     setImmediate("REPEAT");
 
-    addWord("I", [=](TapeVM&){
+    addWord("I", [=](TapeVM& vm){
       if (rstackSize() >= 2) 
         push(rtop());
 
       else throw TapeError("Stack Underflow: return stack (< 2)", "I");
     });
 
-    addWord("J", [=](TapeVM&){
+    addWord("J", [=](TapeVM& vm){
       if (rstackSize() >= 4) 
         push(rat(rstackSize() - 3));
 
       else throw TapeError("Stack Underflow: return stack (< 4)", "J");
     });
 
-    addWord("DO", [=](TapeVM&){
+    addWord("DO", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "DO");
       
@@ -250,7 +239,7 @@ namespace noct {
 
     setImmediate("DO");
 
-    addWord("LOOP", [=](TapeVM&){
+    addWord("LOOP", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "LOOP");
 
@@ -276,7 +265,7 @@ namespace noct {
 
     setImmediate("LOOP");
 
-    addWord("+LOOP", [=](TapeVM&){
+    addWord("+LOOP", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "+LOOP");
 
@@ -302,7 +291,7 @@ namespace noct {
 
     setImmediate("+LOOP");
 
-    addWord("UNLOOP", [=](TapeVM&){
+    addWord("UNLOOP", [=](TapeVM& vm){
       if (rstackSize() < 2)
         throw TapeError("Stack Underflow: return stack (< 2)", "I");
 

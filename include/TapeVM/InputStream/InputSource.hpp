@@ -4,19 +4,9 @@
  */
 #pragma once 
 
-#include <TapeVM/Standalone.hxx>
-
-#if defined(TAPE_STANDALONE)
-
 #include <TapeVM/Configuration.hxx>
 
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
-
-namespace noct {
-#endif 
 
   class TapeAPI InputSource 
   {

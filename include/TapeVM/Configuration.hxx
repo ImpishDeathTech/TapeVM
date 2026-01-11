@@ -10,7 +10,7 @@
 #define TAPE_VERSION_PATCH 0
 #define TAPE_RELEASE       false 
 
-#if defined(TAPE_STANDALONE)
+#if !defined(NOCTSYS_TAPE)
   #if defined(_WIN32)
     #define __TapeVM_Windows__
   

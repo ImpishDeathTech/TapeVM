@@ -2,29 +2,19 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
-
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
-#if defined(TAPE_STANDALONE)
 
-#include <TapeVM.hpp>
-#include <TapeVM/Exception/TapeError.hpp>
 
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
-
-namespace noct {
-#endif
 
   void TapeVM::loadCompilerPrimitives() {
-    addWord(":", [=](TapeVM&){
+    addWord(":", [=](TapeVM& vm){
       std::string name = getNext();
       addWord(name);
       setInputMode(TapeVM::InputMode::Compiling);
@@ -32,7 +22,7 @@ namespace noct {
 
     setImmediate(":");
 
-    addWord(";", [=](TapeVM&){
+    addWord(";", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", ";");
 
@@ -46,14 +36,14 @@ namespace noct {
 
     setImmediate(";");
 
-    addWord("[", [=](TapeVM&){
+    addWord("[", [=](TapeVM& vm){
       if (getInputMode() == TapeVM::InputMode::Compiling)
         setInputMode(TapeVM::InputMode::Interpreting);
 
       else throw TapeError("Compile Only Word", "[");
     });
 
-    addWord("(END)", [=](TapeVM&){
+    addWord("(END)", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Executing:
           m_exec.pop_back();
@@ -77,7 +67,7 @@ namespace noct {
     
     setImmediate("(END)");
 
-    addWord("(LIT)", [=](TapeVM&){
+    addWord("(LIT)", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Executing:
         {
@@ -102,7 +92,7 @@ namespace noct {
 
     setImmediate("(LIT)");
 
-    addWord("(FLIT)", [=](TapeVM&){
+    addWord("(FLIT)", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Executing:
         {
@@ -129,7 +119,7 @@ namespace noct {
 
     setImmediate("(FLIT)");
 
-    addWord("(JMP)", [=](TapeVM&){
+    addWord("(JMP)", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Executing:
         {
@@ -159,7 +149,7 @@ namespace noct {
 
     setImmediate("(JMP)");
 
-    addWord("(0JMP)", [=](TapeVM&){
+    addWord("(0JMP)", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Executing:
           if (stackSize()) {
@@ -193,7 +183,7 @@ namespace noct {
 
     setImmediate("(0JMP)");
 
-    addWord("(BRANCH)", [=](TapeVM&){
+    addWord("(BRANCH)", [=](TapeVM& vm){
       switch (getInputMode()) {
         
         case TapeVM::InputMode::Executing:
@@ -214,7 +204,7 @@ namespace noct {
 
     setImmediate("(BRANCH)");
 
-    addWord("(DO)", [=](TapeVM&){
+    addWord("(DO)", [=](TapeVM& vm){
       if (stackSize() >= 2) {
         auto start = pop(),
              limit = pop();
@@ -225,7 +215,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "(DO)");
     });
 
-    addWord("(LOOP)", [=](TapeVM&){
+    addWord("(LOOP)", [=](TapeVM& vm){
       if (rstackSize() >= 2) {
         auto& index = rtop();
         auto  limit = rat(rstackSize() - 2);
@@ -244,7 +234,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "(LOOP)");
     });
 
-    addWord("(+LOOP)", [=](TapeVM&){
+    addWord("(+LOOP)", [=](TapeVM& vm){
       if (rstackSize() < 2)
         throw TapeError("Return stack underflow", "+LOOP");
 
@@ -266,7 +256,7 @@ namespace noct {
       }
     });
 
-    addWord("IMMEDIATE", [=](TapeVM&){
+    addWord("IMMEDIATE", [=](TapeVM& vm){
       auto* w = findWord(getLastDefinition());
 
       if (!w)
@@ -277,7 +267,7 @@ namespace noct {
 
     setImmediate("IMMEDIATE");
 
-    addWord("POSTPONE", [=](TapeVM&){
+    addWord("POSTPONE", [=](TapeVM& vm){
       if (getInputMode()!= TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "POSTPONE");
 
@@ -287,7 +277,7 @@ namespace noct {
 
     setImmediate("POSTPONE");
 
-    addWord("[CHAR]", [=](TapeVM&){
+    addWord("[CHAR]", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Executing:
         {
@@ -310,7 +300,7 @@ namespace noct {
 
     setImmediate("[CHAR]");
 
-    addWord("[']", [=](TapeVM&){
+    addWord("[']", [=](TapeVM& vm){
       if (getInputMode() == TapeVM::InputMode::Compiling) {
         std::string name = getNext();
         auto*       tag  = findWord(name);

@@ -4,8 +4,6 @@
  */
 #pragma once 
 
-#include <TapeVM/Standalone.hxx>
-
 #include <cstdint>
 #include <atomic>
 #include <array>
@@ -17,21 +15,11 @@
 #include <utility>
 #include <functional>
 
-#if defined(TAPE_STANDALONE)
-
 #include <TapeVM/Configuration.hxx>
 #include <TapeVM/InputStream.hpp>
 #include <TapeVM/OutputStream.hpp>
 
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM/Configuration.hxx>
-#include <NoctSys/Scripting/TapeVM/InputStream.hpp>
-#include <NoctSys/Scripting/TapeVM/OutputStream.hpp>
-
-namespace noct {
-#endif 
 
   class TapeAPI TapeVM
   {
@@ -79,8 +67,7 @@ namespace noct {
     };
 
     typedef std::vector<XToken>                  XVector;
-    typedef std::unordered_map<std::string, WordTag>       
-                                                 Dictionary;
+    typedef std::map<std::string, WordTag>       Dictionary;
 
     struct MemTag {
       std::size_t    size;
@@ -131,7 +118,11 @@ namespace noct {
 
     void             setAllocating(bool flag);
     bool             isAllocating();
+    
     InputStream&     input();
+    void             pushInput(InputSource* src);
+    
+
     OutputStream&    output();
     void             pushOutput(std::unique_ptr<OutputSource<char>> source);
     void             popOutput();
@@ -141,7 +132,7 @@ namespace noct {
     std::string_view getLastDefinition();
 
     WordTag*        findWord(const std::string_view& word);
-    void            addWord(const std::string_view& name, const Function& func, std::uintptr_t data=0ul);
+    void            addWord(const std::string_view& name, Function func, std::uintptr_t data=0ul);
     void            addWord(const std::string_view& name, const Word& token);
     void            addWord(const std::string_view& name);
     void            compileInline(const std::string_view& word, const Function& func, std::uintptr_t data=0ul);
@@ -153,6 +144,7 @@ namespace noct {
     XToken&         getExecuting();
     void            jump(int branches);
     void            execute();
+    void            process();
 
     std::uintptr_t  allot(std::size_t sz);
     bool            isScratchData(std::uintptr_t p);
@@ -213,6 +205,7 @@ namespace noct {
     void loadStackOperators();
     void loadControlStructures();
     void loadParsingWords();
+    void loadSizeWords();
     void loadVariableDefiners();
     void loadStdIO();
   };

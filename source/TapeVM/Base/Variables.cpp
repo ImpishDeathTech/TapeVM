@@ -2,29 +2,17 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
-
-#if defined(TAPE_STANDALONE)
-
-#include <TapeVM.hpp>
-#include <TapeVM/Exception/TapeError.hpp>
-
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
-
-namespace noct {
-#endif
 
   void TapeVM::loadVariableDefiners() {
-    addWord("VARIABLE", [=](TapeVM&){
+    addWord("VARIABLE", [=](TapeVM& vm){
       std::string name = getNext();
       auto        data = alloc(sizeof(std::uintptr_t));
 
@@ -32,52 +20,165 @@ namespace noct {
       findMem(data)->pinned = true;
     });
 
-    addWord("CREATE", [=](TapeVM&){
+    addWord("CREATE", [=](TapeVM& vm){
       std::string name = getNext();
       addWord(name, findWord("(LIT)")->code[0].func, 0ul);
       push(reinterpret_cast<std::uintptr_t>(&(findWord(name)->code[0].data)));
       setAllocating(true);
     });
 
-    addWord("ALLOT", [=](TapeVM&){
+    addWord("C,", [=](TapeVM& vm){
       if (isAllocating()) {
         if (stackSize() >= 2) {
-          auto  size   = pop();
-          auto* data = reinterpret_cast<std::uintptr_t*>(pop());
-          *data      = alloc(size);
-        }
-        else if (stackSize() == 1) pop();
-        else throw TapeError("Stack Underflow", "ALLOT");
-        setAllocating(false);
+          auto ip = 0ul;
+
+          if (stackSize() == 3) {
+            auto  data     = static_cast<char>(pop() % CHAR_MAX);
+            auto& ip       = top();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(at(stackSize() - 2));
+            auto  size     = ip * sizeof(char),
+                  newSize  = (ip + 1) * sizeof(char);
+
+            *memspace = realloc(*memspace, newSize);
+            auto* dp  = reinterpret_cast<char*>((*memspace) + size);
+            *dp = data; 
+            ip++;
+          }
+          else {
+            auto  data     = pop();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(top());
+
+            *memspace = alloc(sizeof(char));
+            auto* dp  = reinterpret_cast<char*>(*memspace);
+            *dp = data;
+
+            push(1ul);
+          }
+        } 
+        else throw TapeError("Stack Underflow", "C,");
       }
-      else if (stackSize()) {
-        auto sz = pop();
-        auto p  = allot(sz);
-        push(p);
+      else throw TapeError("No Memspace", "C,");
+    });
+
+
+    addWord("F,", [=](TapeVM& vm){
+      if (isAllocating()) {
+        if (stackSize() && fstackSize()) {
+          auto ip = 0ul;
+
+          if (stackSize() == 2) {
+            auto  data     = static_cast<float>(fpop());
+            auto& ip       = top();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(at(stackSize() - 2));
+            auto  size     = ip * sizeof(float),
+                  newSize  = (ip + 1) * sizeof(float);
+
+            *memspace = realloc(*memspace, newSize);
+            auto* dp  = reinterpret_cast<float*>((*memspace) + size);
+            *dp = data; 
+            ip++;
+          }
+          else {
+            auto  data     = fpop();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(top());
+
+            *memspace = alloc(sizeof(float));
+            auto* dp  = reinterpret_cast<float*>(*memspace);
+            *dp = data;
+
+            push(1ul);
+          }
+        } 
+        else throw TapeError("Stack Underflow", "F,");
+      }
+      else throw TapeError("No Memspace", "F,");
+    });
+
+    addWord(",", [=](TapeVM& vm){
+      if (isAllocating()) {
+        if (stackSize() >= 2) {
+          auto ip = 0ul;
+        
+          if (stackSize() == 3) {
+            auto  data     = pop();
+            auto& ip       = top();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(at(stackSize() - 2));
+            auto  size     = ip * sizeof(std::uintptr_t),
+                  newSize  = (ip + 1) * sizeof(std::uintptr_t);
+          
+            *memspace = realloc(*memspace, newSize);
+            auto* dp  = reinterpret_cast<std::uintptr_t*>((*memspace) + size);
+            *dp = data; 
+            ip++;
+          }
+          else {
+            auto  data     = pop();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(top());
+            
+            *memspace = alloc(sizeof(std::uintptr_t));
+            auto* dp  = reinterpret_cast<std::uintptr_t*>(*memspace);
+            *dp = data;
+          
+            push(1ul);
+          }
+        } 
+        else throw TapeError("Stack Underflow", ",");
+      }
+      else throw TapeError("No Memspace", ",");
+    });
+
+
+    addWord("ALLOT", [=](TapeVM& vm){
+      if (stackSize()) {
+        if (isAllocating()) {
+          if (stackSize() >= 2) {
+            auto  size     = pop();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(top());
+            auto  addr     = *memspace;
+
+            if (!addr)
+              *memspace = alloc(size);
+          }
+          else {
+
+          }
+          setAllocating(false);
+        }
+        else {
+          auto sz = pop();
+          auto p  = allot(sz);
+          push(p);
+        }
       }
       else throw TapeError("Stack Underflow", "ALLOT");
     });
 
-    addWord("ALLOC", [=](TapeVM&){
-      if (isAllocating()) {
-        if (stackSize() >= 2) {
-          auto  size = pop();
-          auto* data = reinterpret_cast<std::intptr_t*>(pop());
-          *data = alloc(size);
+    addWord("ALLOC", [=](TapeVM& vm){
+      if (stackSize()) {
+        if (isAllocating()) {
+          if (stackSize() >= 2) {
+            auto  size     = pop();
+            auto* memspace = reinterpret_cast<std::uintptr_t*>(top());
+            auto  addr     = *memspace;
+
+            if (!addr)
+              *memspace = alloc(size);
+          }
+          else {
+
+          }
+          setAllocating(false);
         }
-        else if (stackSize() == 1) pop();
-        else throw TapeError("Stack Underflow", "ALLOC");
-        setAllocating(false);
-      }
-      else if (stackSize()) {
-        auto sz = pop();
-        auto p  = alloc(sz);
-        push(p);
+        else {
+          auto sz = pop();
+          auto p  = alloc(sz);
+          push(p);
+        }
       }
       else throw TapeError("Stack Underflow", "ALLOC");
     });
 
-    addWord("FREE", [=](TapeVM&){
+    addWord("FREE", [=](TapeVM& vm){
       if (stackSize()) {
         auto p = pop();
 
@@ -88,7 +189,7 @@ namespace noct {
       }
     });
 
-    addWord("@", [=](TapeVM&){
+    addWord("@", [=](TapeVM& vm){
       if (stackSize()) {
         auto* addr = reinterpret_cast<std::uintptr_t*>(pop());
         if (addr)
@@ -99,7 +200,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "@");
     });
 
-    addWord("C@", [=](TapeVM&){
+    addWord("C@", [=](TapeVM& vm){
       if (stackSize()) {
         auto* str = reinterpret_cast<char*>(pop());
         if (str)
@@ -110,7 +211,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "@");
     });
 
-    addWord("!", [=](TapeVM&){
+    addWord("!", [=](TapeVM& vm){
       if (stackSize() >= 2) {
         auto  a = pop(),
               b = pop();
@@ -120,7 +221,7 @@ namespace noct {
       }
     });
 
-    addWord("C!", [=](TapeVM&){
+    addWord("C!", [=](TapeVM& vm){
       if (stackSize() >= 2) {
         auto  a   = pop(),
               b   = pop();
@@ -132,7 +233,7 @@ namespace noct {
       }
     });
 
-    addWord("F@", [=](TapeVM&){
+    addWord("F@", [=](TapeVM& vm){
       if (stackSize()) {
         auto  addr = pop();
         auto* ptr  = reinterpret_cast<float*>(addr);
@@ -145,7 +246,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "F@");
     });
 
-    addWord("F!", [=](TapeVM&){
+    addWord("F!", [=](TapeVM& vm){
       if (stackSize() && fstackSize()) {
         auto   a   = pop();
         float  b   = fpop(),
@@ -159,7 +260,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "F!");
     });
 
-    addWord("CONSTANT", [=](TapeVM&){
+    addWord("CONSTANT", [=](TapeVM& vm){
       if (stackSize()) {
         std::string name = getNext();
         auto        data = pop();
@@ -168,7 +269,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "CONSTANT");
     });
 
-    addWord("SCONSTANT", [=](TapeVM&){
+    addWord("SCONSTANT", [=](TapeVM& vm){
       if (stackSize()) {
         std::string name = getNext();
         auto        size = pop(),
@@ -192,7 +293,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "CONSTANT");
     });
 
-    addWord("FCONSTANT", [=](TapeVM&){
+    addWord("FCONSTANT", [=](TapeVM& vm){
       if (fstackSize()) {
         std::string name = getNext();
         float* data = (float*)alloc(sizeof(float));

@@ -15,6 +15,7 @@ g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/ParsingWords.cpp -o build
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/StackOperators.cpp -o build/StackOperators.cpp.o -DTAPE_EXPORTS
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/StdIO.cpp -o build/StdIO.cpp.o -DTAPE_EXPORTS
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/Variables.cpp -o build/Variables.cpp.o -DTAPE_EXPORTS
+g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/SizeWords.cpp -o build/SizeWords.cpp.o -DTAPE_EXPORTS
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base.cpp -o build/Base.cpp.o -DTAPE_EXPORTS
 
 g++ -std=c++17 -fpic -I./include -c source/TapeVM.cpp -o build/TapeVM.cpp.o -DTAPE_EXPORTS

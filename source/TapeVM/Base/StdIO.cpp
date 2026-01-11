@@ -2,27 +2,20 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
 
 #include <cstring>
 #include <cassert>
 
-#if defined(TAPE_STANDALONE)
-
-#include <TapeVM.hpp>
-#include <TapeVM/Exception/TapeError.hpp>
-
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/TapeVM/Exception/TapeError.hpp>
-
-namespace noct {
-#endif
 
   InputStream& TapeVM::input() {
     return m_input;
+  }
+
+  void TapeVM::pushInput(InputSource* src) {
+    m_input.push(src);
   }
 
   OutputStream& TapeVM::output() {
@@ -46,7 +39,7 @@ namespace noct {
   }
 
   void TapeVM::loadStdIO() {
-    addWord("EMIT", [=](TapeVM&){
+    addWord("EMIT", [=](TapeVM& vm){
       if (stackSize()) {
         auto ch = static_cast<char>(pop());
         output().put(ch);
@@ -54,11 +47,11 @@ namespace noct {
       else throw TapeError("Stack Underflow", "EMIT");
     });
 
-    addWord("CR", [=](TapeVM&){
+    addWord("CR", [=](TapeVM& vm){
       output().newline();
     });
 
-    addWord("TYPE", [=](TapeVM&){
+    addWord("TYPE", [=](TapeVM& vm){
       if (stackSize() >= 2) {
         auto  len  = static_cast<std::size_t>(pop());
         auto* str  = reinterpret_cast<char*>(pop());
@@ -67,11 +60,11 @@ namespace noct {
       else throw TapeError("StackUnderflow", "type");
     });
 
-    addWord("SPACE", [=](TapeVM&){
+    addWord("SPACE", [=](TapeVM& vm){
       output().put(' ');
     });
 
-    addWord(".", [=](TapeVM&){
+    addWord(".", [=](TapeVM& vm){
       if (stackSize()) {
         auto v = static_cast<int>(pop());
         output() << v;
@@ -79,7 +72,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", ".");
     });
 
-    addWord("U.", [=](TapeVM&){
+    addWord("U.", [=](TapeVM& vm){
       if (stackSize()) {
         auto v = static_cast<unsigned>(pop());
         output() << v;
@@ -87,7 +80,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", ".");
     });
 
-    addWord("F.", [=](TapeVM&){
+    addWord("F.", [=](TapeVM& vm){
       if (fstackSize()) {
         auto v = fpop();
         output() << v;
@@ -95,7 +88,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", ".");
     });
 
-    addWord(".S", [=](TapeVM&){
+    addWord(".S", [=](TapeVM& vm){
       output() << "stack <" << stackSize() << "> ";
 
       for (auto i = 0; i < stackSize(); i++)
@@ -103,7 +96,7 @@ namespace noct {
 
     });
 
-    addWord("U.S", [=](TapeVM&){
+    addWord("U.S", [=](TapeVM& vm){
       output() << "stack <" << stackSize() << "> ";
       
       for (auto i = 0; i < stackSize(); i++)
@@ -111,7 +104,7 @@ namespace noct {
 
     });
 
-    addWord("F.S", [=](TapeVM&){
+    addWord("F.S", [=](TapeVM& vm){
       output() << "fstack <" << fstackSize() << "> ";
       
       for (auto i = 0; i < fstackSize(); i++)
@@ -119,7 +112,7 @@ namespace noct {
 
     });
 
-    addWord(">OUT", [=](TapeVM&){
+    addWord(">OUT", [=](TapeVM& vm){
       if (stackSize() == 2) {
         auto  len = static_cast<std::size_t>(pop());
         auto* str = reinterpret_cast<char*>(pop());
@@ -152,12 +145,12 @@ namespace noct {
       else throw TapeError("Stack Underflow", ">OUT");
     });
 
-    addWord("OUT>", [=](TapeVM&){
+    addWord("OUT>", [=](TapeVM& vm){
       popOutput();
     });
 
 
-    addWord(">STR", [=](TapeVM&){
+    addWord(">STR", [=](TapeVM& vm){
       auto                strSrc    = std::make_unique<StringOutputSource>();
       StringOutputSource* strSrcRaw = strSrc.get();
 
@@ -165,7 +158,7 @@ namespace noct {
       rpush(reinterpret_cast<std::uintptr_t>(strSrcRaw));
     });
 
-    addWord("STR@", [=](TapeVM&){
+    addWord("STR@", [=](TapeVM& vm){
       if (output().isString()) {
         auto* ss = output().getCurrentStringSource();
 
@@ -179,7 +172,7 @@ namespace noct {
       else throw TapeError("Current output is not a string", "STR@");
     });
 
-    addWord("STR>", [=](TapeVM&){
+    addWord("STR>", [=](TapeVM& vm){
       if (rstackSize()) {
         if (!output().isString()) 
           throw TapeError("Current output is not a string", "STR>");

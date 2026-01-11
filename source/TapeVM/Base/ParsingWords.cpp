@@ -2,34 +2,23 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
+#include <TapeVM.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
 
 #include <cassert>
 #include <cmath>
 #include <cstring>
 
-#if defined(TAPE_STANDALONE)
-
-#include <TapeVM.hpp>
-#include <TapeVM/Exception/TapeError.hpp>
-
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM.hpp>
-#include <NoctSys/Scripting/TapeVM/Exception/TapeError.hpp>
-
-namespace noct {
-#endif
 
   void TapeVM::loadParsingWords() {
-    addWord("\\", [=](TapeVM&){
+    addWord("\\", [=](TapeVM& vm){
       for (auto ch = input().get(); ch != '\n'; ch = input().get());
     });
 
     setImmediate("\\");
 
-    addWord("(", [=](TapeVM&){
+    addWord("(", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Compiling:
         {
@@ -47,20 +36,14 @@ namespace noct {
 
     setImmediate("(");
 
-    addWord("(*", [=](TapeVM&){
-      for (auto word = getNext(); word != "*)"; word = getNext());
-    });
-
-    setImmediate("(*");
-
-    addWord("(**", [=](TapeVM&){
+    addWord("(*", [=](TapeVM& vm){
       switch (getInputMode()) {
         case TapeVM::InputMode::Compiling:
         {
           auto&       word = *findWord(getLastDefinition());
           std::string tmp;
 
-          word.semantics += "(**\n";
+          word.semantics += "(*\n";
 
           for (auto ch = input().get();; ch = input().get()) {
             if (std::isspace(ch)) {
@@ -82,9 +65,9 @@ namespace noct {
       }
     });
 
-    setImmediate("(**");
+    setImmediate("(*");
 
-    addWord("S\"", [=](TapeVM&){
+    addWord("S\"", [=](TapeVM& vm){
       if (getInputMode() == TapeVM::InputMode::Interpreting) {
         std::string str;
         char*       cstr = nullptr;
@@ -95,7 +78,7 @@ namespace noct {
         auto  data = allot(str.length());
               cstr = reinterpret_cast<char*>(data);
 
-        std::strncpy(cstr, str.c_str(), str.length());
+        std::memcpy(cstr, str.c_str(), str.length());
 
         push(data);
         push(str.length());
@@ -105,7 +88,7 @@ namespace noct {
 
     setImmediate("S\"");
 
-    addWord("C\"", [=](TapeVM&){
+    addWord("C\"", [=](TapeVM& vm){
       if (getInputMode()== TapeVM::InputMode::Compiling) {
         std::string str;
         char*       cstr = nullptr;
@@ -116,7 +99,7 @@ namespace noct {
         auto  data = alloc(str.length());
               cstr = reinterpret_cast<char*>(data);
 
-        std::strncpy(cstr, str.c_str(), str.length());
+        std::memcpy(cstr, str.c_str(), str.length());
 
         auto& lit = findWord("(LIT)")->code[0].func;
 
@@ -129,7 +112,7 @@ namespace noct {
 
     setImmediate("C\"");
 
-    addWord("PARSE", [=](TapeVM&){
+    addWord("PARSE", [=](TapeVM& vm){
       if (stackSize()) {
         char        delim = char(pop() % CHAR_MAX);
         std::string str;
@@ -149,7 +132,7 @@ namespace noct {
       else throw TapeError("Stack Underflow", "PARSE");
     });
 
-    addWord("PARSE-NAME", [=](TapeVM&){
+    addWord("PARSE-NAME", [=](TapeVM& vm){
       std::string name   = getNext();
       auto        data   = allot(name.length());
       char*       buffer = reinterpret_cast<char*>(data);
@@ -161,12 +144,12 @@ namespace noct {
       push(name.length());
     });
 
-    addWord("CHAR", [=](TapeVM&){
+    addWord("CHAR", [=](TapeVM& vm){
       std::string name = getNext();
       push(name[0]);
     });
 
-    addWord("'", [=](TapeVM&){
+    addWord("'", [=](TapeVM& vm){
       std::string name = getNext();
       auto* xtoken = findWord(name);
 

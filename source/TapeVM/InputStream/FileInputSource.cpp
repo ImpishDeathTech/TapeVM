@@ -2,19 +2,9 @@
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-#include <TapeVM/Standalone.hxx>
-
-#if defined(TAPE_STANDALONE)
-
 #include <TapeVM/InputStream/FileInputSource.hpp>
 
 namespace tape {
-#else
-
-#include <NoctSys/Scripting/TapeVM/InputStream/FileInputSource.hpp>
-
-namespace noct {
-#endif 
 
   FileInputSource::FileInputSource(const std::filesystem::path& path)
     : m_stream(path)
