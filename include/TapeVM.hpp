@@ -19,6 +19,7 @@
 #include <TapeVM/InputStream.hpp>
 #include <TapeVM/OutputStream.hpp>
 #include <TapeVM/CaseInsensitiveKey.hpp>
+#include <TapeVM/Exception/TapeError.hpp>
 
 namespace tape {
 
@@ -32,7 +33,8 @@ namespace tape {
     OutputStream                    m_output;
     std::vector<std::unique_ptr<OutputSource<char>>>
                                     m_ostack;
-    bool                            m_isAllocating;
+    bool                            m_isAllocating,
+                                    m_isRunning;
     std::vector<std::string>        m_includeDirectories;
 
   public:
@@ -105,8 +107,10 @@ namespace tape {
     typedef std::vector<ControlFrame> ControlStack;
 
   private:
+    std::vector<InputMode>
+                 m_mode;
+    
     ControlStack m_cstack;
-    InputMode    m_mode;
     Dictionary   m_dict;
     XVector      m_exec;
     HeapArena    m_mem;
@@ -119,6 +123,8 @@ namespace tape {
 
     void             setAllocating(bool flag);
     bool             isAllocating();
+
+    bool             isRunning();
     
     InputStream&     input();
     void             pushInput(InputSource* src);
@@ -129,6 +135,7 @@ namespace tape {
     void             popOutput();
 
     void             setInputMode(InputMode mode);
+    void             popInputMode();
     InputMode        getInputMode();
     std::string_view getLastDefinition();
 
@@ -182,6 +189,7 @@ namespace tape {
     bool            cstack_empty();
 
     void            clearStacks();
+    void            errorCleanup(TapeError& exn, std::string& input);
 
     std::string    getNext();
 
@@ -209,6 +217,7 @@ namespace tape {
     void loadSizeWords();
     void loadVariableDefiners();
     void loadStdIO();
+    void internalExecute();
   };
 
 }

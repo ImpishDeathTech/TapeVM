@@ -1,3 +1,5 @@
+g++ -std=c++17 -fpic -I./include -c source/TapeVM/CaseInsensitiveKey.cpp -o build/CaseInsensitiveKey.cpp.o -DTAPE_EXPORTS
+
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/InputStream/StringInputSource.cpp -o build/StringInputSource.cpp.o -DTAPE_EXPORTS
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/InputStream/FileInputSource.cpp -o build/FileInputSource.cpp.o -DTAPE_EXPORTS
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/InputStream/StdinSource.cpp -o build/StdinSource.cpp.o -DTAPE_EXPORTS
@@ -19,4 +21,6 @@ g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/SizeWords.cpp -o build/Si
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base.cpp -o build/Base.cpp.o -DTAPE_EXPORTS
 
 g++ -std=c++17 -fpic -I./include -c source/TapeVM.cpp -o build/TapeVM.cpp.o -DTAPE_EXPORTS
-g++ -std=c++17 -shared -L./library -o library/tapevm.dll build/*.cpp.o
+g++ -std=c++17 -shared -o tapevm.dll build/*.cpp.o
+
+g++ -std=c++17 -I./INCLUDE -L./ -o tapevm.exe Main.cpp -ltapevm

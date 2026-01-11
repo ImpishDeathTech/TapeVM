@@ -94,6 +94,7 @@ namespace tape {
       for (auto i = 0; i < stackSize(); i++)
         output() << static_cast<int>(at(i)) << ' ';
 
+      output().newline();
     });
 
     addWord("U.S", [=](TapeVM& vm){
@@ -102,6 +103,7 @@ namespace tape {
       for (auto i = 0; i < stackSize(); i++)
         output() << static_cast<unsigned>(at(i)) << ' ';
 
+      output().newline();
     });
 
     addWord("F.S", [=](TapeVM& vm){
@@ -110,6 +112,7 @@ namespace tape {
       for (auto i = 0; i < fstackSize(); i++)
         output() << fat(i) << ' ';
 
+      output().newline();
     });
 
     addWord(">OUT", [=](TapeVM& vm){

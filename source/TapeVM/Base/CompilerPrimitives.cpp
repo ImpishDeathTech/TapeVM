@@ -17,7 +17,9 @@ namespace tape {
     addWord(":", [=](TapeVM& vm){
       std::string name = getNext();
       addWord(name);
+      popInputMode();
       setInputMode(TapeVM::InputMode::Compiling);
+      setInputMode(TapeVM::InputMode::Executing);
     });
 
     setImmediate(":");
@@ -31,17 +33,10 @@ namespace tape {
 
       compileInline(getLastDefinition(), findWord("(END)")->code[0].func);
       resetScratchArena(TapeVM::ScratchReset::Definition);
-      setInputMode(TapeVM::InputMode::Interpreting);
+      popInputMode();
     });
 
     setImmediate(";");
-
-    addWord("[", [=](TapeVM& vm){
-      if (getInputMode() == TapeVM::InputMode::Compiling)
-        setInputMode(TapeVM::InputMode::Interpreting);
-
-      else throw TapeError("Compile Only Word", "[");
-    });
 
     addWord("(END)", [=](TapeVM& vm){
       switch (getInputMode()) {

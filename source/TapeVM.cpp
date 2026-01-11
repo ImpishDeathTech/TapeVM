@@ -12,9 +12,11 @@
 namespace tape {
 
   TapeVM::TapeVM() 
-    : m_stack(), m_fstack(), m_dict(), m_exec(), m_mem(), m_mode(TapeVM::InputMode::Interpreting)
-      
+    : m_stack(), m_fstack(), m_dict(), m_exec(), m_mem(), m_mode(),
+      m_isRunning(true), m_isAllocating(false)
   {
+    setInputMode(TapeVM::InputMode::Interpreting);
+
 #if defined(__TapeVM_UNIX__) || defined(__NoctSys_UNIX__)
     m_includeDirectories = {
       "/usr/share/tapevm/libraries/?.tape",
@@ -63,6 +65,10 @@ namespace tape {
     }
   }
 
+
+  bool TapeVM::isRunning() {
+    return m_isRunning;
+  }
   void TapeVM::addIncludeDirectory(const std::string& directory) {
     m_includeDirectories.push_back(directory);
   }
@@ -86,12 +92,21 @@ namespace tape {
   }
 
   void TapeVM::setInputMode(TapeVM::InputMode mode) {
-    m_mode = mode;
+    m_mode.push_back(mode);
   }
 
+  void TapeVM::popInputMode() {
+    if (!m_mode.empty()) {
+      m_mode.pop_back();
+      
+      if (m_mode.empty())
+        m_mode.push_back(TapeVM::InputMode::Interpreting);
+    }
+    else m_mode.push_back(TapeVM::InputMode::Interpreting);
+  }
 
   TapeVM::InputMode TapeVM::getInputMode() {
-    return m_mode;
+    return m_mode.back();
   }
 
 
@@ -110,7 +125,7 @@ namespace tape {
 
 
   void TapeVM::addWord(const std::string_view& word) {
-    auto        it = m_dict.find(word.data());
+    auto        it = m_dict.find(word);
 
     if (it != m_dict.end())
       m_dict[word].code.clear();
@@ -129,7 +144,7 @@ namespace tape {
 
 
   void TapeVM::addWord(const std::string_view& name, const TapeVM::Word& token) {
-    m_dict[std::string(name)] = { token };
+    m_dict[name] = { token };
   }
 
 
@@ -164,10 +179,19 @@ namespace tape {
 
 
   void TapeVM::execute() {
-    if (!m_exec.empty()) {
-      auto lastMode = m_mode;
-      m_mode = TapeVM::InputMode::Executing;
+    switch (getInputMode()) {
+      case TapeVM::InputMode::Compiling:
+        internalExecute();
 
+      default:
+        setInputMode(TapeVM::InputMode::Executing);
+        internalExecute();
+        popInputMode();
+    }
+  }
+
+  void TapeVM::internalExecute() {
+    if (!m_exec.empty()) {
       do {
         auto& token = m_exec.back();
 
@@ -180,8 +204,6 @@ namespace tape {
           token.ip++;
         }
       } while (!m_exec.empty());
-
-      m_mode = lastMode;
     }
   }
 
@@ -536,7 +558,8 @@ namespace tape {
   float TapeVM::toRealnum(const std::string& word) {
     std::string translation = word;
     translation.erase(0, 1);
-    return std::stof(translation);
+    double number = std::stod(translation);
+    return static_cast<float>(number);
   }
 
 
@@ -654,6 +677,12 @@ namespace tape {
     m_cstack.clear();
     m_ostack.clear();
     resetScratchArena(TapeVM::ScratchReset::ClearStacks);
+  }
+
+  void TapeVM::errorCleanup(TapeError& exn, std::string& input) {
+    input.clear();
+    clearStacks();
+    std::fprintf(stderr, "\x1B[31m%s\033[0m\n\x1B[33moops\033[0m> ", exn.what());
   }
 
 }

@@ -15,8 +15,8 @@ namespace tape {
     std::string m_key;
 
   public:
-    CaseInsensitiveKey(const std::string& view);
-
+    CaseInsensitiveKey(const std::string_view& view);
+    CaseInsensitiveKey(const std::string& str);
     CaseInsensitiveKey(const char* view);
 
     const char*      cstr()   const;

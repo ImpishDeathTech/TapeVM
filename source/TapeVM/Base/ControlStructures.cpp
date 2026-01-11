@@ -298,6 +298,12 @@ namespace tape {
       rpop();
       rpop();
     });
+
+    addWord("BYE", [=](TapeVM& vm){
+      m_isRunning = false;
+    });
+
+    setImmediate("BYE");
   }
 
 }

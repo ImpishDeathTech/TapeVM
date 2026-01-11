@@ -11,6 +11,12 @@
 #include <TapeVM.hpp>
 #include <TapeVM/Exception/TapeError.hpp>
 
+#if defined(__TapeVM_UNIX___)
+#include <unistd.h>
+#elif defined(__TapeVM_Windows__)
+#include <windows.h>
+#endif
+
 namespace tape {
 
   void TapeVM::loadTapeBase() {
@@ -31,7 +37,6 @@ namespace tape {
     // Module Loading              //
     /////////////////////////////////
 
-    std::cerr << "loadTapeBase: 9: INCLUDE\n";
     addWord("INCLUDE", [=](TapeVM& vm){
       std::string modname = getNext();
 
