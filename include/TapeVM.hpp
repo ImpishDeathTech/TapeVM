@@ -18,6 +18,7 @@
 #include <TapeVM/Configuration.hxx>
 #include <TapeVM/InputStream.hpp>
 #include <TapeVM/OutputStream.hpp>
+#include <TapeVM/CaseInsensitiveKey.hpp>
 
 namespace tape {
 
@@ -66,8 +67,8 @@ namespace tape {
       std::size_t ip;
     };
 
-    typedef std::vector<XToken>                  XVector;
-    typedef std::map<std::string, WordTag>       Dictionary;
+    typedef std::vector<XToken>                    XVector;
+    typedef std::map<CaseInsensitiveKey, WordTag>  Dictionary;
 
     struct MemTag {
       std::size_t    size;

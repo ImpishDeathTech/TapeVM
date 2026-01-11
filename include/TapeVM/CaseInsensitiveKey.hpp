@@ -1,23 +1,27 @@
+/* TapeVM/CaseInsensitiveKey
+ * Copyright (c) 2026, Christopher Stephen Rafuse
+ * BSD-2-Clause
+ */
+#pragma once 
+#include <TapeVM/Configuration.hxx>
+
 #include <functional>
 #include <iostream>
 #include <cstdint>
-#include <map>
 
-  class CaseInsensitiveKey {
+namespace tape {
+  class TapeAPI CaseInsensitiveKey 
+  {
     std::string m_key;
 
   public:
-    explicit CaseInsensitiveKey(const std::string_view& view) 
-      : m_key(view)
-    {}
+    CaseInsensitiveKey(const std::string& view);
 
-    CaseInsensitiveKey(const char* view) 
-      : m_key(view)
-    {}
+    CaseInsensitiveKey(const char* view);
 
-    const char* get() {
-      return m_key.c_str();
-    }
+    const char*      cstr()   const;
+    std::string_view view()   const;
+    std::string      string() const;
 
     bool less(const std::string& key) const {
       return std::lexicographical_compare(m_key.begin(), m_key.end(), key.begin(), key.end(),
@@ -37,24 +41,20 @@
       return equal(key.m_key);
     }
 
-    bool operator==(const std::string_view& key) const {
-      return equal(std::string(key));
+    bool operator==(const std::string& key) const {
+      return equal(key);
     }
 
     bool operator<(const CaseInsensitiveKey& key) const {
       return less(key.m_key);
     }
 
-    bool operator<(const std::string_view& key) const {
-      return less(std::string(key));
+    bool operator<(const std::string& key) const {
+      return less(key);
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const CaseInsensitiveKey& key) {
+      return os << key.m_key;
     }
   };
-
-
-int main() {
-  std::map<CaseInsensitiveKey, int> peeb {
-    { "Peenor", 23 }, {"NIGGER", 44}, {"poznik", 43}
-  };
-  std::cout << peeb["nigger"] << std::endl;
-  std::cout << peeb["peenor"] << std::endl;
 }

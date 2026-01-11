@@ -1,9 +1,8 @@
-#pragma once
 /* TapeVM/Configuration.hxx
  * Copyright (c) 2026, Christopher Stephen Rafuse
  * BSD-2-Clause
  */
-
+#pragma once
 
 #define TAPE_VERSION_MAJOR 1
 #define TAPE_VERSION_MINOR 0

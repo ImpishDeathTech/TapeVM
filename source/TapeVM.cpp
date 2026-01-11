@@ -101,7 +101,7 @@ namespace tape {
 
 
   TapeVM::WordTag* TapeVM::findWord(const std::string_view& word) {
-    auto it = m_dict.find(std::string(word));
+    auto it = m_dict.find(word);
     if (it != m_dict.end())
       return &(it->second);
 
@@ -111,12 +111,11 @@ namespace tape {
 
   void TapeVM::addWord(const std::string_view& word) {
     auto        it = m_dict.find(word.data());
-    std::string w{word};
 
     if (it != m_dict.end())
-      m_dict[w].code.clear();
+      m_dict[word].code.clear();
     
-    else m_dict[w] = {};
+    else m_dict[word] = {};
 
     m_lastDefinition = std::string(word);
   }

@@ -14,25 +14,17 @@
 namespace tape {
 
   void TapeVM::loadTapeBase() {
-    std::cerr << "loadTapeBase: 1: loadCompilerPrimitives\n";
     loadCompilerPrimitives();
-    std::cerr << "loadTapeBase: 2: loadStackOperators\n";
     loadStackOperators();
-    std::cerr << "loadTapeBase: 3: loadControlStructures\n";
     loadControlStructures();
-    std::cerr << "loadTapeBase: 4: loadVariableDefiners\n";
     loadVariableDefiners();
-    std::cerr << "loadTapeBase: 5: loadParsingWords\n";
     loadParsingWords();
-    std::cerr << "loadTapeBase: 6: loadSizeWords\n";
     loadSizeWords();
-    std::cerr << "loadTapeBase: 7: loadStdIO\n";
     loadStdIO();
 
-    std::cerr << "loadTapeBase: 8: WORDS\n";
     addWord("WORDS", [=](TapeVM& vm){
-      for (auto word : m_dict) 
-        std::fprintf(stderr, "%s %s\n\n", word.first.c_str(), word.second.semantics.c_str());
+      for (const auto& word : m_dict)
+        std::cerr << word.first << word.second.semantics << std::endl;
     });
 
     /////////////////////////////////
@@ -54,7 +46,10 @@ namespace tape {
 
       throw TapeError("Module Not Found", modname);
     });
+
+    setSemmantics("INCLUDE", "( \"<name>\"  -- )");
   }
+
 
 }
 
