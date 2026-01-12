@@ -53,7 +53,7 @@ void repl(tape::TapeVM& vm) {
     std::getline(std::cin, input);
 
     try {
-      vm.pushInput(new tape::StringInputSource(input));
+      vm << input;
       vm.process();
 
       if (vm.isRunning()) {
@@ -86,12 +86,11 @@ int main(int argc, char** argv) {
 
   if (argc == 2) {
     try {
-      vm.pushInput(new tape::FileInputSource(argv[1]));
+      vm << std::filesystem::path(argv[1]);
       vm.process();
     } catch (tape::TapeError& exn) {
       std::cerr << exn.what() << std::endl;
     }
-    repl(vm);
   } 
   else {
     std::clog << "TapeVM ver " 

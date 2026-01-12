@@ -26,11 +26,12 @@ namespace tape {
     loadParsingWords();
     loadSizeWords();
     loadStdIO();
+    loadConditionals();
 
     addWord("WORDS", [=](TapeVM& vm){
       pushOutput(std::make_unique<StderrSource>());
 
-      for (const auto& word : m_dict)
+      for (const auto& word : m_dict) 
         output() << word.first.view() << ' ';
 
       output().newline();
@@ -56,6 +57,13 @@ namespace tape {
     setImmediate("SEMANTICS");
     setSemmantics("SEMANTICS", "(\"<spaces>name\" -- )");
 
+    addWord("INPUT-MODE", [=](TapeVM& vm){
+      push(static_cast<std::uintptr_t>(getInputMode()));
+    });
+
+    addWord("INPUT-MODE.COMPILING", findWord("(LIT)")->code[0].func, static_cast<std::uintptr_t>(TapeVM::InputMode::Compiling));
+    addWord("INPUT-MODE.EXECUTING", findWord("(LIT)")->code[0].func, static_cast<std::uintptr_t>(TapeVM::InputMode::Executing));
+    
     /////////////////////////////////
     // Module Loading              //
     /////////////////////////////////

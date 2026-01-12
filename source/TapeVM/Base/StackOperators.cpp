@@ -66,6 +66,49 @@ namespace tape {
       else throw TapeError("Stack Underflow", "SWAP");
     });
 
+    addWord("2DUP", [=](TapeVM& vm){
+      if (stackSize() >= 2) {
+        auto a = top(),
+             b = at(stackSize() - 2);
+        push(b);
+        push(a);
+      }
+      else throw TapeError("Stack Underflow", "2DUP");
+    });
+
+    addWord("2DROP", [=](TapeVM& vm){
+      if (stackSize() >= 2) {
+        pop();
+        pop();
+      }
+        
+      else throw TapeError("Stack Underflow", "2DROP");
+    });
+
+    addWord("2OVER", [=](TapeVM& vm){
+      if (stackSize() >= 4) { 
+        auto a = at(stackSize()-3),
+             b = at(stackSize()-4);
+        push(b);
+        push(a);
+      }
+      else throw TapeError("Stack Underflow", "2OVER");
+    });
+
+    addWord("2SWAP", [=](TapeVM& vm){
+      if (stackSize() >= 4) {
+        auto a = top(),
+             b = at(stackSize()-2),
+             c = at(stackSize()-3),
+             d = at(stackSize()-4);
+        top()             = c;
+        at(stackSize()-2) = d;
+        at(stackSize()-3) = a;
+        at(stackSize()-4) = b;
+      }  
+      else throw TapeError("Stack Underflow", "2SWAP");
+    });
+
     addWord("DUP", [=](TapeVM& vm){
       if (stackSize())
         push(top());
@@ -87,6 +130,13 @@ namespace tape {
       else throw TapeError("Stack Underflow", "OVER");
     });
 
+     addWord("SWAP", [=](TapeVM& vm){
+      if (stackSize() >= 2)
+        std::swap(top(), at(stackSize()-2));
+      
+      else throw TapeError("Stack Underflow", "SWAP");
+    });
+
     addWord("ROT", [=](TapeVM& vm){
       if (stackSize() >= 3) {
         auto a = top();
@@ -98,70 +148,6 @@ namespace tape {
 
       }
       else throw TapeError("Stack Underflow", "ROT");
-    });
-
-    addWord("=", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a == b);
-      }
-    });
-
-    addWord("<", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a<b);
-      }
-    });
-
-    addWord(">", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a>b);
-      }
-    });
-
-    addWord("<=", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a<=b);
-      }
-    });
-
-    addWord(">=", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a>=b);
-      }
-    });
-
-    addWord("<>", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a<b || a>b);
-      }
-    });
-
-    addWord("OR", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a|b);
-      }
-    });
-
-    addWord("AND", [=](TapeVM& vm){
-      if (stackSize() >= 2) {
-        auto a = pop(),
-             b = pop();
-        push(a&b);
-      }
     });
 
     addWord("S>F", [=](TapeVM& vm){
@@ -285,6 +271,12 @@ namespace tape {
         push(rpop());
 
       else throw TapeError("Stack Underflow", "R>");
+    });
+
+    addWord("R.", [=](TapeVM& vm){
+      if (rstackSize())
+        output() << rpop();
+      else throw TapeError("Stack Underflow", "R.");
     });
   }
 

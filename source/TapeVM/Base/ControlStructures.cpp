@@ -84,7 +84,7 @@ namespace tape {
       auto  if_frame = cpop();
       
       std::size_t else_ip = w->code.size();
-      w->code[if_frame.patch_ip].data = else_ip - if_frame.patch_ip - 1;
+      w->code[if_frame.patch_ip].data = else_ip - if_frame.patch_ip;
 
       compileInline(getLastDefinition(), findWord("(JMP)")->code[0].func, 0ul);
 
@@ -112,6 +112,19 @@ namespace tape {
     setImmediate("THEN");
     setSemmantics("THEN", "(C: orig -- )\n(R: -- )");
 
+    addWord("THEN:", [=](TapeVM& vm){
+      if (getInputMode() != TapeVM::InputMode::Compiling) 
+        throw TapeError("Compile Only Word", "THEN");
+      
+      auto n = toInteger(getNext());
+
+      for (auto i = 0ul; i < n; i++)
+        findWord("THEN")->code[0].func(*this);
+    });
+
+    setImmediate("THEN:");
+    setSemmantics("THEN:", "(C: orig \"<spaces>numstr\" -- )\n(R: -- )");
+
     addWord("BEGIN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
         throw TapeError("Compile Only Word", "BEGIN");
@@ -134,7 +147,7 @@ namespace tape {
       auto  frame = cpop();
       
       std::size_t here_ip = w->code.size();
-      auto         offset  = -static_cast<std::intptr_t>(here_ip - frame.patch_ip + 1);
+      auto        offset  = -static_cast<std::intptr_t>(here_ip - frame.patch_ip);
 
       compileInline(getLastDefinition(), findWord("(JMP)")->code[0].func, offset);
 
@@ -157,7 +170,7 @@ namespace tape {
       auto* w     = findWord(getLastDefinition());
       auto  frame = cpop();
       
-      auto offset = -static_cast<std::intptr_t>(w->code.size() - frame.patch_ip + 1);
+      auto offset = -static_cast<std::intptr_t>(w->code.size() - frame.patch_ip);
 
       compileInline(getLastDefinition(), findWord("(0JMP)")->code[0].func, offset);
       
@@ -203,7 +216,7 @@ namespace tape {
         throw TapeError("Malformed BEGIN WHILE REPEAT", "REPEAT");
       
       std::size_t here_ip = w->code.size();
-      auto        offset  = -(std::intptr_t)(w->code.size() - beginFrame.patch_ip + 1);
+      auto        offset  = -(std::intptr_t)(w->code.size() - beginFrame.patch_ip);
 
       compileInline(getLastDefinition(), findWord("(JMP)")->code[0].func, offset);
 
@@ -267,7 +280,7 @@ namespace tape {
 
       auto*       w       = findWord(getLastDefinition());
       std::size_t here_ip = w->code.size();
-      auto        offset  = -static_cast<std::intptr_t>(here_ip - frame.patch_ip + 1);
+      auto        offset  = -static_cast<std::intptr_t>(here_ip - frame.patch_ip);
 
       compileInline(getLastDefinition(), findWord("(LOOP)")->code[0].func, offset);
 
@@ -294,7 +307,7 @@ namespace tape {
 
       auto*       w       = findWord(getLastDefinition());
       std::size_t here_ip = w->code.size();
-      auto        offset  = -static_cast<std::intptr_t>(here_ip - frame.patch_ip + 1);
+      auto        offset  = -static_cast<std::intptr_t>(here_ip - frame.patch_ip);
 
       compileInline(getLastDefinition(), findWord("(+LOOP)")->code[0].func, offset);
 

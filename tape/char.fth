@@ -102,14 +102,19 @@ CHAR | CONSTANT '|'
 CHAR } CONSTANT '}'
 CHAR ~ CONSTANT '~'
 
-: isdigit ( c -- b )
-  dup '0' > IF 
-    '9' < IF 
-      true dup . cr 
+
+
+: ISDIGIT ( char -- bool )
+  dup '0' >= 
+  IF 
+    '9' <= 
+    IF 
+      true 
     ELSE 
-      false dup . cr
-    THEN
-  ELSE
-    drop false dup . cr
+      false 
+    THEN 
+  ELSE 
+    drop false 
   THEN
 ;
+

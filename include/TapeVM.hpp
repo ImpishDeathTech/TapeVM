@@ -213,6 +213,7 @@ namespace tape {
   private:
     void loadCompilerPrimitives();
     void loadStackOperators();
+    void loadConditionals();
     void loadControlStructures();
     void loadParsingWords();
     void loadSizeWords();

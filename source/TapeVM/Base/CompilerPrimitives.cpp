@@ -312,6 +312,26 @@ namespace tape {
 
     setImmediate("[']");
     setSemmantics("[']", "(C: \"<spaces>name\" -- )\n(R: -- xt )");
+    
+    addWord("COMPILE,", [=](TapeVM& vm){
+      if (getInputMode() == TapeVM::InputMode::Compiling) {
+        if (stackSize()) {
+          auto *w = reinterpret_cast<TapeVM::WordTag*>(pop()),
+               *current = findWord(getLastDefinition());
+
+          if (w) {
+            for (auto pack : w->code)
+              current->code.push_back(pack);
+            
+            current->code.pop_back();
+          }
+        }
+      }
+    });
+
+    setImmediate("COMPILE,");
+    setSemmantics("COMPILE,", "( xt -- )");
   }
 
+  
 }

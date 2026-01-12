@@ -1,3 +1,7 @@
+/* TapeVM/CaseInsensitiveKey.cpp
+ * Copyright (c) 2026, Christopher Stephen Rafuse
+ * BSD-2-Clause
+ */
 #include <TapeVM/CaseInsensitiveKey.hpp>
 
 namespace tape {

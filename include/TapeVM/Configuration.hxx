@@ -6,7 +6,7 @@
 
 #define TAPE_VERSION_MAJOR 1
 #define TAPE_VERSION_MINOR 0
-#define TAPE_VERSION_PATCH 2
+#define TAPE_VERSION_PATCH 3
 #define TAPE_RELEASE       false 
 
 #if !defined(NOCTSYS_TAPE)
@@ -50,7 +50,27 @@
   
 #else 
 #include <NoctSys/Configuration.hxx>
-  #if defined(TAPE_EXPORTS)
+  #if defined(_WIN32)
+    #define __TapeVM_Windows__ __NoctSys_Windows__
+  
+  #elif defined(__unix__)
+    #define __TapeVM_UNIX__ __NoctSys_UNIX__
+  
+    #if defined(__linux__)
+      #define __TapeVM_Linux__ __NoctSys_Linux__
+      
+    #elif defined(__FreeBSD__) || defined(__FreeBSD_Kernel__)
+      #define __TapeVM_FreeBSD__ __NoctSys_FreeBSD__
+  
+    #else 
+      #error TapeVM does not support this UNIX system
+    #endif
+  
+  #else 
+    #error TapeVM does not support this operating system
+  #endif
+
+  #if defined(NOCTSYS_EXPORTS)
     #define TapeAPI __NoctSys_Export__ 
   #else 
     #define TapeAPI __NoctSys_Import__ 

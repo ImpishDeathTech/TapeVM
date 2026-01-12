@@ -69,13 +69,16 @@ namespace tape {
 
     addWord("S\"", [=](TapeVM& vm){
       if (getInputMode() == TapeVM::InputMode::Executing) {
+        input().get();
+
         std::string str = parseUntil('"');
         char*       cstr = nullptr;
 
-        auto  data = allot(str.length());
+        auto  data = allot(str.length() + 1);
               cstr = reinterpret_cast<char*>(data);
 
         std::memcpy(cstr, str.c_str(), str.length());
+        cstr[str.length()] = '\0';
 
         push(data);
         push(str.length());
@@ -87,12 +90,13 @@ namespace tape {
 
     addWord("C\"", [=](TapeVM& vm){
       if (getInputMode()== TapeVM::InputMode::Compiling) {
+        input().get();
         std::string str = parseUntil('"');
         char*       cstr = nullptr;
 
         auto  data = alloc(str.length());
               cstr = reinterpret_cast<char*>(data);
-
+        
         std::memcpy(cstr, str.c_str(), str.length());
 
         auto& lit = findWord("(LIT)")->code[0].func;
