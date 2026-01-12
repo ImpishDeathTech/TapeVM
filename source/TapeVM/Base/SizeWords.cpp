@@ -12,12 +12,18 @@ namespace tape {
       push(sizeof(std::uintptr_t));
     });
 
+    setSemmantics("CELL", "( -- n )");
+
     addWord("FLOAT", [=](TapeVM& vm){
       push(sizeof(float));
     });
 
+    setSemmantics("FLOAT", "( -- n )");
+
     addWord("INT", [=](TapeVM& vm){
       push(sizeof(std::uintptr_t));
     });
+
+    setSemmantics("INT", "( -- n )");
   }
 }

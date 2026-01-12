@@ -29,6 +29,7 @@ namespace tape {
     });
 
     setImmediate("EXIT");
+    setSemmantics("EXIT", "( -- )\n(R: nest-sys -- )");
 
     addWord("LEAVE", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -55,6 +56,7 @@ namespace tape {
     });
 
     setImmediate("LEAVE");
+    setSemmantics("LEAVE", "( -- )\n(R: loop-sys -- )");
 
     addWord("IF", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -62,13 +64,14 @@ namespace tape {
 
       auto* w = findWord(getLastDefinition());
 
-      std::size_t ip = w->code.size();
+      std::size_t if_ip = w->code.size();
 
       w->code.push_back({findWord("(0JMP)")->code[0].func, 0ul});
-      cpush({TapeVM::ControlFrame::IF, ip});
+      cpush({TapeVM::ControlFrame::IF, if_ip});
     });
 
     setImmediate("IF");
+    setSemmantics("IF", "(C: -- orig )\n(R: x -- )");
 
     addWord("ELSE", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -83,20 +86,20 @@ namespace tape {
       std::size_t else_ip = w->code.size();
       w->code[if_frame.patch_ip].data = else_ip - if_frame.patch_ip - 1;
 
-      std::size_t jmp_ip = w->code.size();
       compileInline(getLastDefinition(), findWord("(JMP)")->code[0].func, 0ul);
 
-      cpush({ TapeVM::ControlFrame::ELSE, jmp_ip });
+      cpush({ TapeVM::ControlFrame::ELSE, else_ip });
     });
 
     setImmediate("ELSE");
+    setSemmantics("ELSE", "(C: orig1 -- orig2 )\n(R: -- )");
 
     addWord("THEN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling) 
         throw TapeError("Compile Only Word", "THEN");
       
       else if (cstack_empty() 
-      or      (ctop().type != TapeVM::ControlFrame::IF && ctop().type) != TapeVM::ControlFrame::ELSE)
+      or      (ctop().type != TapeVM::ControlFrame::IF) && (ctop().type != TapeVM::ControlFrame::ELSE))
         throw TapeError("THEN without IF or ELSE", "THEN");
 
       auto* w     = findWord(getLastDefinition());
@@ -107,6 +110,7 @@ namespace tape {
     });
 
     setImmediate("THEN");
+    setSemmantics("THEN", "(C: orig -- )\n(R: -- )");
 
     addWord("BEGIN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -117,6 +121,7 @@ namespace tape {
     });
 
     setImmediate("BEGIN");
+    setSemmantics("BEGIN", "(C: -- dest )\n(R: -- )");
 
     addWord("AGAIN", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -140,6 +145,7 @@ namespace tape {
     });
 
     setImmediate("AGAIN");
+    setSemmantics("AGAIN", "(C: dest -- )\n(R: -- )");
 
     addWord("UNTIL", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -162,6 +168,7 @@ namespace tape {
     });
 
     setImmediate("UNTIL");
+    setSemmantics("UNTIL", "(C: dest -- )\n(R: x -- )");
 
     addWord("WHILE", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -178,6 +185,7 @@ namespace tape {
     });
 
     setImmediate("WHILE");
+    setSemmantics("WHILE", "(C: dest -- orig-dest )\n(R: x -- )");
 
     addWord("REPEAT", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -211,6 +219,7 @@ namespace tape {
     });
 
     setImmediate("REPEAT");
+    setSemmantics("REPEAT", "(C: orig-dest -- )\n(R: -- )");
 
     addWord("I", [=](TapeVM& vm){
       if (rstackSize() >= 2) 
@@ -219,12 +228,16 @@ namespace tape {
       else throw TapeError("Stack Underflow: return stack (< 2)", "I");
     });
 
+    setSemmantics("I", "( -- n|u )\n(R: loop-sys1 loop-sys2 -- loop-sys1 loop-sys2 )");
+
     addWord("J", [=](TapeVM& vm){
       if (rstackSize() >= 4) 
         push(rat(rstackSize() - 3));
 
       else throw TapeError("Stack Underflow: return stack (< 4)", "J");
     });
+
+    setSemmantics("J", "( -- n|u )\n(R: loop-sys -- loop-sys )");
 
     addWord("DO", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -238,6 +251,7 @@ namespace tape {
     });
 
     setImmediate("DO");
+    setSemmantics("DO", "(C: -- do-sys )\n(R: n1|u1 n2|u2 -- loop-sys )");
 
     addWord("LOOP", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -264,6 +278,7 @@ namespace tape {
     }); 
 
     setImmediate("LOOP");
+    setSemmantics("LOOP", "(C: do-sys -- )\n(R: loopsys-1 -- |loop-sys2 )");
 
     addWord("+LOOP", [=](TapeVM& vm){
       if (getInputMode() != TapeVM::InputMode::Compiling)
@@ -290,6 +305,7 @@ namespace tape {
     });
 
     setImmediate("+LOOP");
+    setSemmantics("LOOP", "(C: do-sys -- )\n(R: loopsys-1 -- |loop-sys2 )");
 
     addWord("UNLOOP", [=](TapeVM& vm){
       if (rstackSize() < 2)
@@ -304,6 +320,7 @@ namespace tape {
     });
 
     setImmediate("BYE");
+    setSemmantics("BYE", "( -- )");
   }
 
 }

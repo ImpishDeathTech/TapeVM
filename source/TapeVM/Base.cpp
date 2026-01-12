@@ -31,7 +31,7 @@ namespace tape {
       pushOutput(std::make_unique<StderrSource>());
 
       for (const auto& word : m_dict)
-        output() << word.first.view();
+        output() << word.first.view() << ' ';
 
       output().newline();
 
@@ -52,6 +52,9 @@ namespace tape {
       }
       else throw TapeError("Unknown Word", token);
     });
+
+    setImmediate("SEMANTICS");
+    setSemmantics("SEMANTICS", "(\"<spaces>name\" -- )");
 
     /////////////////////////////////
     // Module Loading              //

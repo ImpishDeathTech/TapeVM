@@ -1,0 +1,2 @@
+#1 CONSTANT true 
+#0 CONSTANT false

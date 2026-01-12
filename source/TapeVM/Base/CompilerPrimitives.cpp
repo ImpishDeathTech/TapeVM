@@ -296,7 +296,7 @@ namespace tape {
     });
 
     setImmediate("[CHAR]");
-    setSemmantics("[CHAR]", "(\"<spaces>name\" -- )");
+    setSemmantics("[CHAR]", "(C: \"<spaces>name\" -- )\n(R: -- char )");
 
     addWord("[']", [=](TapeVM& vm){
       if (getInputMode() == TapeVM::InputMode::Compiling) {
@@ -311,7 +311,7 @@ namespace tape {
     });
 
     setImmediate("[']");
-    setSemmantics("[CHAR]", "(\"<spaces>name\" -- )");
+    setSemmantics("[']", "(C: \"<spaces>name\" -- )\n(R: -- xt )");
   }
 
 }
