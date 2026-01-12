@@ -23,5 +23,6 @@ library\tapevm.dll
 test.exe
 Main.o
 cpp.out 
-tapevm.dll
+bin/tapevm.dll
+bin/tapevm.exe
 test.cpp

@@ -6,7 +6,6 @@
 #include <cmath>
 #include <cstring>
 #include <memory>
-#include <iostream>
 
 #include <TapeVM.hpp>
 #include <TapeVM/Exception/TapeError.hpp>
@@ -29,8 +28,29 @@ namespace tape {
     loadStdIO();
 
     addWord("WORDS", [=](TapeVM& vm){
+      pushOutput(std::make_unique<StderrSource>());
+
       for (const auto& word : m_dict)
-        std::cerr << word.first << word.second.semantics << std::endl;
+        output() << word.first.view();
+
+      output().newline();
+
+      popOutput();
+    });
+
+    setImmediate("WORDS");
+    setSemmantics("WORDS", "( -- )");
+
+    addWord("SEMANTICS", [=](TapeVM& vm){
+      std::string token = getNext();
+      auto*       word  = findWord(token);
+
+      if (word) {
+        pushOutput(std::make_unique<StderrSource>());
+        output() << word->semantics << '\n';
+        popOutput();
+      }
+      else throw TapeError("Unknown Word", token);
     });
 
     /////////////////////////////////

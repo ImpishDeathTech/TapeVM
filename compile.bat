@@ -21,6 +21,6 @@ g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base/SizeWords.cpp -o build/Si
 g++ -std=c++17 -fpic -I./include -c source/TapeVM/Base.cpp -o build/Base.cpp.o -DTAPE_EXPORTS
 
 g++ -std=c++17 -fpic -I./include -c source/TapeVM.cpp -o build/TapeVM.cpp.o -DTAPE_EXPORTS
-g++ -std=c++17 -shared -o tapevm.dll build/*.cpp.o
+g++ -std=c++17 -shared -o bin/tapevm.dll build/*.cpp.o
 
-g++ -std=c++17 -I./INCLUDE -L./ -o tapevm.exe Main.cpp -ltapevm
+g++ -std=c++17 -I./INCLUDE -L./bin -o bin/tapevm.exe Main.cpp -ltapevm

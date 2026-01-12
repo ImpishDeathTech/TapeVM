@@ -261,6 +261,7 @@ namespace tape {
     });
 
     setImmediate("IMMEDIATE");
+    setSemmantics("IMMEDIATE", "( -- )");
 
     addWord("POSTPONE", [=](TapeVM& vm){
       if (getInputMode()!= TapeVM::InputMode::Compiling)
@@ -271,6 +272,7 @@ namespace tape {
     });
 
     setImmediate("POSTPONE");
+    setSemmantics("POSTPONE", "(\"<spaces>name\" -- )");
 
     addWord("[CHAR]", [=](TapeVM& vm){
       switch (getInputMode()) {
@@ -294,6 +296,7 @@ namespace tape {
     });
 
     setImmediate("[CHAR]");
+    setSemmantics("[CHAR]", "(\"<spaces>name\" -- )");
 
     addWord("[']", [=](TapeVM& vm){
       if (getInputMode() == TapeVM::InputMode::Compiling) {
@@ -308,6 +311,7 @@ namespace tape {
     });
 
     setImmediate("[']");
+    setSemmantics("[CHAR]", "(\"<spaces>name\" -- )");
   }
 
 }
