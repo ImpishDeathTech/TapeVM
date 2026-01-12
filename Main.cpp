@@ -17,7 +17,7 @@ the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
 the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS”
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
 IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
@@ -29,30 +29,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 )_BSD_2_Clause_"
 };
 
-int main(int argc, char** argv) {
-  tape::TapeVM vm;
-  std::string  input = "";
 
-  vm.loadTapeBase();
-  vm.reserveScratchArena(SCRATCH_SIZE);
+void repl(tape::TapeVM& vm) {
+  std::string input;
 
   vm.addWord("LICENSE", [](tape::TapeVM& vm){
-    std::cerr << TAPE_LICENSE << std::endl;
+    std::cerr << "\x1B[1;34m" << TAPE_LICENSE << "\033[0m" << std::endl;
   });
 
   vm.setImmediate("LICENSE");
 
   vm.addWord("CLEAR", [=](tape::TapeVM& vm){
+#if defined(__TapeVM_UNIX__)
     system("clear");
+#elif defined(__TapeVM_Windows__)
+    system("cls");
+#endif
   });
 
   vm.setImmediate("CLEAR");
-
-  std::printf("TapeVM v%d.%d.%d, [Copyright 2026 (c) Christopher Stephen Rafuse]\n", 
-      TAPE_VERSION_MAJOR, TAPE_VERSION_MINOR, TAPE_VERSION_PATCH);
-  std::cerr << "TapeVM Software comes void and exempt of ANY AND ALL WARRENTIES; type 'LICENSE' for details\n"
-            << "Type 'BYE' to exit\n"
-            << "eval> ";
 
   while (vm.isRunning()) {
     std::getline(std::cin, input);
@@ -66,11 +61,11 @@ int main(int argc, char** argv) {
         case tape::TapeVM::InputMode::Interpreting:
           vm.resetScratchArena(tape::TapeVM::ScratchReset::Line);
           input.clear();
-          std::cout << "\x1B[32mokay\033[0m> ";
+          std::clog << "\x1B[32mokay\033[0m> ";
           break;
       
         case tape::TapeVM::InputMode::Compiling:
-          std::cout << "\x1b[34mcomp\033[0m> ";
+          std::clog << "\x1b[34mcomp\033[0m> ";
           break;
         }
       }
@@ -79,6 +74,35 @@ int main(int argc, char** argv) {
       vm.errorCleanup(exn, input);
       continue;
     }
+  }
+}
+
+
+int main(int argc, char** argv) {
+  tape::TapeVM vm;
+
+  vm.loadTapeBase();
+  vm.reserveScratchArena(SCRATCH_SIZE);
+
+  if (argc == 2) {
+    try {
+      vm.pushInput(new tape::FileInputSource(argv[1]));
+      vm.process();
+    } catch (tape::TapeError& exn) {
+      std::cerr << exn.what() << std::endl;
+    }
+    repl(vm);
+  } 
+  else {
+    std::clog << "TapeVM ver " 
+              << TAPE_VERSION_MAJOR << '.' 
+              << TAPE_VERSION_MINOR << '.' 
+              << TAPE_VERSION_PATCH << " [release: " << std::boolalpha << TAPE_RELEASE << "]\n"
+              << "Copyright 2026 (c) Christopher Stephen Rafuse (BSD 2-Clause)\n"
+              << "TapeVM Software comes void and exempt of ANY AND ALL WARRENTIES; type 'LICENSE' for details\n"
+              << "Type 'BYE' to exit\n"
+              << "eval> ";
+    repl(vm);
   }
 
   return EXIT_SUCCESS;

@@ -191,6 +191,7 @@ namespace tape {
     void            clearStacks();
     void            errorCleanup(TapeError& exn, std::string& input);
 
+    std::string    parseUntil(char ch);
     std::string    getNext();
 
     bool           isInteger(const std::string& word);

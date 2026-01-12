@@ -13,7 +13,7 @@ namespace tape {
 
   void TapeVM::loadParsingWords() {
     addWord("\\", [=](TapeVM& vm){
-      for (auto ch = input().get(); ch != '\n'; ch = input().get());
+      parseUntil('\n');
     });
 
     setImmediate("\\");
@@ -30,7 +30,7 @@ namespace tape {
           word.semantics += ')';
         } break;
         default:
-          for (auto ch = input().get(); ch != ')'; ch = input().get());
+          parseUntil(')');
       }
     });
 
@@ -68,12 +68,9 @@ namespace tape {
     setImmediate("(*");
 
     addWord("S\"", [=](TapeVM& vm){
-      if (getInputMode() == TapeVM::InputMode::Interpreting) {
-        std::string str;
+      if (getInputMode() == TapeVM::InputMode::Executing) {
+        std::string str = parseUntil('"');
         char*       cstr = nullptr;
-
-        for (auto ch = input().get(); ch != '"'; ch = input().get())
-          str += ch;
 
         auto  data = allot(str.length());
               cstr = reinterpret_cast<char*>(data);
@@ -90,11 +87,8 @@ namespace tape {
 
     addWord("C\"", [=](TapeVM& vm){
       if (getInputMode()== TapeVM::InputMode::Compiling) {
-        std::string str;
+        std::string str = parseUntil('"');
         char*       cstr = nullptr;
-
-        for (auto ch = input().get(); ch != '"'; ch = input().get())
-          str += ch;
 
         auto  data = alloc(str.length());
               cstr = reinterpret_cast<char*>(data);
@@ -107,7 +101,7 @@ namespace tape {
         compileInline(getLastDefinition(), lit, str.length());
         findMem(data)->pinned = true;
       }
-      else throw TapeError("Compile Only Word", "C\"");
+      else throw TapeError("Compile Only Word: use 'S\"' when not compiling", "C\"");
     });
 
     setImmediate("C\"");
@@ -115,16 +109,12 @@ namespace tape {
     addWord("PARSE", [=](TapeVM& vm){
       if (stackSize()) {
         char        delim = char(pop() % CHAR_MAX);
-        std::string str;
-
-        for (auto ch = input().get(); ch != delim; ch = input().get())
-          str += ch;
+        std::string str   = parseUntil(delim);
         
         auto  data = allot(str.length());
         char* buf  = reinterpret_cast<char*>(data);
 
-        for (auto i = 0ul; i < str.length(); i++)
-          buf[i] = str[i];
+        std::memcpy(buf, str.c_str(), str.length());
 
         push(data);
         push(str.length());
@@ -133,12 +123,11 @@ namespace tape {
     });
 
     addWord("PARSE-NAME", [=](TapeVM& vm){
-      std::string name   = getNext();
-      auto        data   = allot(name.length());
-      char*       buffer = reinterpret_cast<char*>(data);
+      std::string name = getNext();
+      auto        data = allot(name.length());
+      char*       buf  = reinterpret_cast<char*>(data);
 
-      for (auto i = 0; i < name.length(); i++) 
-        buffer[i] = name[i];
+      std::memcpy(buf, name.c_str(), name.length());
       
       push(data);
       push(name.length());

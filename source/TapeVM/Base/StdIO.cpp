@@ -116,7 +116,7 @@ namespace tape {
     });
 
     addWord(">OUT", [=](TapeVM& vm){
-      if (stackSize() == 2) {
+      if (stackSize() >= 2) {
         auto  len = static_cast<std::size_t>(pop());
         auto* str = reinterpret_cast<char*>(pop());
         std::string path(str, len);

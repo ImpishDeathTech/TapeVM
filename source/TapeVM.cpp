@@ -441,7 +441,22 @@ namespace tape {
     return output;
   }
 
-    bool TapeVM::isInteger(const std::string& word) {
+  std::string TapeVM::parseUntil(char CH) {
+    std::string output;
+    int         ch;
+
+    for (ch = m_input.get(); ch != EOF && ch != CH; ch = m_input.get())
+      output.push_back(char(ch));
+    
+    if (ch != '"') {
+      if (ch != EOF)
+        m_input.unget();
+    }
+
+    return output;
+  }
+
+  bool TapeVM::isInteger(const std::string& word) {
     switch (word[0]) {
       case '&':
       {
@@ -676,6 +691,8 @@ namespace tape {
     m_exec.clear();
     m_cstack.clear();
     m_ostack.clear();
+    m_mode.clear();
+    m_mode.push_back(TapeVM::InputMode::Interpreting);
     resetScratchArena(TapeVM::ScratchReset::ClearStacks);
   }
 

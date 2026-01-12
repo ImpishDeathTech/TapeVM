@@ -6,7 +6,7 @@
 
 #define TAPE_VERSION_MAJOR 1
 #define TAPE_VERSION_MINOR 0
-#define TAPE_VERSION_PATCH 0
+#define TAPE_VERSION_PATCH 2
 #define TAPE_RELEASE       false 
 
 #if !defined(NOCTSYS_TAPE)
